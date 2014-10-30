@@ -1,10 +1,8 @@
 from django.test import TestCase
 
 from rest_framework.renderers import JSONRenderer
-from rest_framework.serializers import ReturnDict
 
-from ember_drf.renderers import EmberJSONRenderer, ActiveModelJSONRenderer, \
-    convert_related_keys
+from drf_ember.renderers import EmberJSONRenderer, convert_related_keys
 
 from tests.serializers import ChildSideloadSerializer
 from tests.models import ChildModel, ParentModel

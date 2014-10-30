@@ -6,7 +6,7 @@ def get_readme():
     return open(os.path.join(os.path.dirname(__file__), 'README.md')).read()
 
 setup(
-    name='Ember DRF',
+    name='DRF Ember',
     version='0.1.0',
     description="Django Rest Framework addons to integrate with Ember.js",
     long_description=get_readme(),

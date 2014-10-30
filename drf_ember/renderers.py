@@ -4,7 +4,7 @@ from rest_framework.relations import PrimaryKeyRelatedField, ManyRelation
 from rest_framework.renderers import JSONRenderer
 from rest_framework.serializers import ListSerializer
 
-from ember_drf.serializers import SideloadListSerializer, SideloadSerializer
+from drf_ember.serializers import SideloadListSerializer, SideloadSerializer
 
 def convert_to_camel_case(data):
     """Convert all dictionary keys to camel case."""

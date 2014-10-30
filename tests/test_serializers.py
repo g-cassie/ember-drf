@@ -1,11 +1,10 @@
 from django.test import TestCase
 
-from rest_framework.serializers import ReturnDict
+from drf_ember.serializers import SideloadListSerializer
 
-from ember_drf.serializers import SideloadListSerializer
-
-from tests.models import ChildModel, ParentModel
-from tests.serializers import ChildSideloadSerializer
+from tests.models import ChildModel, ParentModel, OptionalChildModel
+from tests.serializers import ChildSideloadSerializer, \
+    OptionalChildSideloadSerializer
 
 
 class TestSideloadSerializer(TestCase):
@@ -51,6 +50,16 @@ class TestSideloadSerializer(TestCase):
             ]
         }
         self.assertEqual(result, expected)
+
+    def test_optional_foreign_key_serialization(self):
+        child = OptionalChildModel.objects.create()
+        result = OptionalChildSideloadSerializer(child).data
+        expected = {
+            'optional_child_model': {'id': child.pk, 'parent': None},
+            'parent_models': []
+        }
+        self.assertEqual(result, expected)
+
 
 class TestSideloadListSerailizer(TestCase):
 

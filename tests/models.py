@@ -25,3 +25,8 @@ class ParentModel(TestModel):
 class ChildModel(TestModel):
     parent = models.ForeignKey(ParentModel, related_name='children')
     old_parent = models.ForeignKey(ParentModel, related_name='old_children')
+
+
+class OptionalChildModel(TestModel):
+    parent = models.ForeignKey(ParentModel, blank=True, null=True,
+                               related_name='optional_children')

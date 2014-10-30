@@ -4,7 +4,7 @@ from inflection import pluralize, underscore
 
 from rest_framework.serializers import ReturnDict, \
     ListSerializer, Serializer
-from rest_framework.relations import PrimaryKeyRelatedField
+from rest_framework.relations import PrimaryKeyRelatedField, ManyRelation
 
 class SideloadSerializerMixin(object):
 
@@ -54,9 +54,10 @@ class SideloadSerializerMixin(object):
                 conf = self.get_sideload_config()[key]
             except KeyError:
                 raise ValueError(
+                    'Unable to find configuration for {}.  '
                     'You must provide a tuple in the following format for '
                     'each sideloaded model: '
-                    '(\'<model name>\', <serializer class>)')
+                    '(\'<model name>\', <serializer class>)'.format(key))
             ret[key] = conf['serializer'](
                 conf['model'].objects.filter(pk__in=ids), many=True).data
         return ret
@@ -125,19 +126,20 @@ class SideloadSerializer(SideloadSerializerMixin, Serializer):
         for field in fields:
             # we cannot use field.get_attribute as that will give us a back
             # a `PKOnlyObject`.
+            model = field.queryset.model
             attribute = getattr(instance, field.source)
             if isinstance(field, PrimaryKeyRelatedField):
-                key = self.get_sideload_key_name(attribute.__class__)
-                sideloads[key].add(attribute.id)
-            elif isinstance(field, ListSerializer):
-                key = self.get_sideload_key_name(attribute.model)
+                key = self.get_sideload_key_name(model)
+                sideloads[key].add(getattr(attribute, 'id', None))
+            elif isinstance(field, (ListSerializer, ManyRelation)):
+                key = self.get_sideload_key_name(model)
                 sideloads[key].update(
                     set(attribute.values_list('id', flat=True)))
             else:
                 raise ValueError(
-                    'Encountered an unexpected field class %s.  Did '
+                    'Encountered an unexpected field class {}.  Did '
                     'you specify a field in `sideload_fields` that is '
-                    'not a relation?')
+                    'not a relation?'.format(field.__class__))
         return sideloads
 
     def to_representation(self, instance):
