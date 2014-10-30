@@ -33,7 +33,7 @@ class ChildSideloadSerializer(SideloadSerializer):
     class Meta:
         sideload_fields = ['parent', 'old_parent']
         base_serializer = ChildSerializer
-        sideloads = [(ParentModel, ParentSerializer)]
+        sideloads = [(ParentModel, ParentSerializer, ParentModel.objects.prefetch_related('children', 'old_children'))]
 
 
 class OptionalChildSideloadSerializer(SideloadSerializer):

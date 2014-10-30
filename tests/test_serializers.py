@@ -37,7 +37,8 @@ class TestSideloadSerializer(TestCase):
         self.assertTrue(isinstance(result, SideloadListSerializer))
 
     def test_serialization(self):
-        result = ChildSideloadSerializer(self.child).data
+        with self.assertNumQueries(3):
+            result = ChildSideloadSerializer(self.child).data
         expected = {
             'child_model': {
                 'id': self.child.pk,
@@ -92,15 +93,17 @@ class TestSideloadListSerailizer(TestCase):
         ]
 
     def test_get_sideload_ids(self):
-        result = ChildSideloadSerializer(many=True).get_sideload_ids(
-            ChildModel.objects.all())
+        with self.assertNumQueries(1):
+            result = ChildSideloadSerializer(many=True).get_sideload_ids(
+                ChildModel.objects.all())
         self.assertEqual(len(result), 1)
         self.assertEqual(result['parent_models'],
                          set([p.id for p in self.parents]))
 
     def test_get_sideload_objects(self):
-        result = ChildSideloadSerializer(many=True).get_sideload_objects(
-            ChildModel.objects.all())
+        with self.assertNumQueries(4):
+            result = ChildSideloadSerializer(many=True).get_sideload_objects(
+                ChildModel.objects.all())
         expected = [
             {'id': p.id, 'text': p.text, 'children': p.child_ids,
             'old_children': p.old_child_ids}
@@ -110,7 +113,8 @@ class TestSideloadListSerailizer(TestCase):
 
 
     def test_serialization(self):
-        result = ChildSideloadSerializer(ChildModel.objects.all(), many=True).data
+        with self.assertNumQueries(5):
+            result = ChildSideloadSerializer(ChildModel.objects.all(), many=True).data
         expected = {
             'child_models': [{
                 'id': c.pk,
