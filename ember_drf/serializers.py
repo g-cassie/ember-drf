@@ -3,12 +3,15 @@ from collections import defaultdict
 from inflection import pluralize, underscore
 
 from rest_framework.serializers import ReturnDict, \
-    ListSerializer, BaseSerializer, Serializer
+    ListSerializer, Serializer
 from rest_framework.relations import PrimaryKeyRelatedField
 
-class SideloadMixin(object):
+class SideloadSerializerMixin(object):
 
     def get_sideload_key_name(self, model, singular=False):
+        """
+        Gets the dictionary key to nest a model's instances under.
+        """
         name = model.__name__
         if not singular:
             name = pluralize(name)
@@ -16,7 +19,7 @@ class SideloadMixin(object):
 
     def get_sideload_config(self):
         """
-        Returns a dictionary of configuration for the serializer.
+        Gets a dictionary with the configuration for the serializer.
 
         Expects that the `Meta` class has a `sideloads` property that contains
         a list of tuples in the format `(ModelClass, SerializerClass)`.
@@ -35,7 +38,7 @@ class SideloadMixin(object):
 
     def get_sideload_objects(self, data):
         """
-        Get a dictionary of objects to sideload.
+        Gets a dictionary of objects to sideload.
 
         Args:
             data (list): the list of objects that are being serialized and
@@ -59,7 +62,7 @@ class SideloadMixin(object):
         return ret
 
 
-class SideloadListSerializer(SideloadMixin, ListSerializer):
+class SideloadListSerializer(SideloadSerializerMixin, ListSerializer):
 
     def get_sideload_ids(self, data):
         """
@@ -99,7 +102,7 @@ class SideloadListSerializer(SideloadMixin, ListSerializer):
         return ret
 
 
-class SideloadSerializer(SideloadMixin, Serializer):
+class SideloadSerializer(SideloadSerializerMixin, Serializer):
 
     def __new__(cls, *args, **kwargs):
         # We override this method in order to automagically create

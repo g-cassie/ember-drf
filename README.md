@@ -1,10 +1,11 @@
 # Overview
+
 This project aims to create a python package that makes it simple to build an
 API that is compatible with
 [Ember Data](https://github.com/emberjs/data)
 out of the box. While initially the user will still be required to configure
-their urls and serializers in a certain way for them to work properly, the goal
-is to make this as pluggable as possible.
+their urls and serializers in a certain way for them to work properly, the 
+goal is to make this as pluggable as possible.
 
 ## Structure
 There are currently two parts to the project:
@@ -17,12 +18,20 @@ care of this as well soon.
 
 ## Serializer
 
-The focus of the ember_drf serializers is to achive the following:
-1. Nest the repsonse data under a root key.
-2. Allow for sideloading of related data.
-To do this we provide the `SideloadSerializer` base class.  This must be used
-in conjunction with the typical `ModelSerializers` that one would write
-in a typical DRF application.
+`ember_drf` uses Serializers to make structural modifications to the default
+DRF responses (as opposed to purely aesthetic modifications that are handled by
+renderers).  The primary structural difference between Ember Data and
+out of the box DRF are as follows:
+
+1. Responses from the api are nested under a root key.
+
+2. Related records can be sideloaded under other root keys.
+
+`ember_drf` supports the above structural changes by providing the
+SideloadSerializer base class.  This must be used in conjunction with
+one or more typical `ModelSerializers`.  Despite the name, SideloadSerializer
+may be used without any sideloading options in order to simply nest the
+api response under a root key.
 
 ### Serializer Example
 
@@ -76,10 +85,17 @@ This will produce output in the following format:
 Note that the serializer does not convert the underscored attributes to camel
 case. That functionality is decoupled and put in the EmberJSONRenderer.
 
-## Renderer
+## Renderers
 
-The render has a simple job: to convert underscored attribute names to
-camel case. Details on how to use renders can be found
+This project uses renderers to make changes that are purely aesthetic (as opposed to structural).  There are two renders:
+
+1. EmberJSONRenderer: For use with Ember Data's built in JSONSerializer.
+
+2. Active ModelJSONRenderer: For use with Ember Data's built in
+    ActiveModelSerializer.
+
+
+Details on how to use renders can be found
 [here](http://www.django-rest-framework.org/api-guide/renderers)
 
 # Notes

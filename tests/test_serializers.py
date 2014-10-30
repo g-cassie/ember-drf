@@ -1,28 +1,12 @@
-from ember_drf.serializers import SideloadSerializer, SideloadListSerializer
-
-from rest_framework import serializers
-
 from django.test import TestCase
 
+from rest_framework.serializers import ReturnDict
+
+from ember_drf.serializers import SideloadListSerializer
+
 from tests.models import ChildModel, ParentModel
+from tests.serializers import ChildSideloadSerializer
 
-class ChildSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ChildModel
-
-
-class ParentSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ParentModel
-
-
-class ChildSideloadSerializer(SideloadSerializer):
-    class Meta:
-        sideload_fields = ['parent', 'old_parent']
-        base_serializer = ChildSerializer
-        sideloads = [
-            (ParentModel, ParentSerializer)
-        ]
 
 class TestSideloadSerializer(TestCase):
 
@@ -40,7 +24,10 @@ class TestSideloadSerializer(TestCase):
 
     def test_get_sideload_objects(self):
         result = ChildSideloadSerializer().get_sideload_objects(self.child)
-        expected = [{'id': p.id, 'text': p.text} for p in ParentModel.objects.all()]
+        expected = [
+           {'id': p.id, 'text': p.text, 'children': p.child_ids,
+            'old_children': p.old_child_ids}
+            for p in ParentModel.objects.all()]
         self.assertEqual(len(result), 1)
         self.assertEqual(result['parent_models'], expected)
 
@@ -57,8 +44,10 @@ class TestSideloadSerializer(TestCase):
                 'old_parent': self.old_parent.pk
             },
             'parent_models': [
-                {'id': self.parent.pk, 'text': self.parent.text},
-                {'id': self.old_parent.pk, 'text': self.old_parent.text}
+                {'id': self.parent.pk, 'text': self.parent.text,
+                 'children': [self.child.pk], 'old_children': []},
+                {'id': self.old_parent.pk, 'text': self.old_parent.text,
+                 'children': [], 'old_children': [self.child.pk]}
             ]
         }
         self.assertEqual(result, expected)
@@ -83,7 +72,10 @@ class TestSideloadListSerailizer(TestCase):
     def test_get_sideload_objects(self):
         result = ChildSideloadSerializer(many=True).get_sideload_objects(
             ChildModel.objects.all())
-        expected = [{'id': p.id, 'text': p.text} for p in ParentModel.objects.all()]
+        expected = [
+            {'id': p.id, 'text': p.text, 'children': p.child_ids,
+            'old_children': p.old_child_ids}
+            for p in ParentModel.objects.all()]
         self.assertEqual(len(result), 1)
         self.assertEqual(result['parent_models'], expected)
 
@@ -97,7 +89,10 @@ class TestSideloadListSerailizer(TestCase):
                 'old_parent': c.old_parent.pk
             } for c in self.children],
             'parent_models': [
-                {'id': p.pk, 'text': p.text} for p in self.parents
+                {'id': p.pk, 'text': p.text,
+                'children': p.child_ids,
+                'old_children': p.old_child_ids}
+                for p in self.parents
             ]
         }
         self.assertEqual(result, expected)
