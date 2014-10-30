@@ -30,3 +30,10 @@ class ChildModel(TestModel):
 class OptionalChildModel(TestModel):
     parent = models.ForeignKey(ParentModel, blank=True, null=True,
                                related_name='optional_children')
+
+class ReverseOneToOne(TestModel):
+    pass
+
+class OneToOne(TestModel):
+    reverse_one_to_one = models.OneToOneField(
+        ReverseOneToOne, related_name='one_to_one')

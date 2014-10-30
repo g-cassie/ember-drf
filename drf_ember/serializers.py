@@ -1,10 +1,11 @@
-
 from collections import defaultdict
 from inflection import pluralize, underscore
 
+from rest_framework.relations import PrimaryKeyRelatedField, ManyRelation
 from rest_framework.serializers import ReturnDict, \
     ListSerializer, Serializer
-from rest_framework.relations import PrimaryKeyRelatedField, ManyRelation
+from rest_framework.utils.model_meta import get_field_info
+
 
 class SideloadSerializerMixin(object):
 
@@ -121,25 +122,31 @@ class SideloadSerializer(SideloadSerializerMixin, Serializer):
         sideload_fields = getattr(self.Meta, 'sideload_fields', [])
         fields = [field for field in base_serializer().fields.values()
                   if field.source in sideload_fields]
+        info = get_field_info(base_serializer.Meta.model).relations
 
         sideloads = defaultdict(set)
         for field in fields:
             # we cannot use field.get_attribute as that will give us a back
             # a `PKOnlyObject`.
-            model = field.queryset.model
-            attribute = getattr(instance, field.source)
+            assert isinstance(field, (PrimaryKeyRelatedField, ManyRelation)), \
+                ('Encountered an unexpected field class {}.  Did '
+                'you specify a field in `sideload_fields` that is '
+                'not a relation?'.format(field.__class__))
+            model = info[field.source].related
+            key = self.get_sideload_key_name(model)
+
+            try:
+                attribute = getattr(instance, field.source)
+            except model.DoesNotExist:
+                # this occurs when you look up a blank reverse OneToOneField
+                attribute = None
+
             if isinstance(field, PrimaryKeyRelatedField):
-                key = self.get_sideload_key_name(model)
                 sideloads[key].add(getattr(attribute, 'id', None))
-            elif isinstance(field, (ListSerializer, ManyRelation)):
-                key = self.get_sideload_key_name(model)
+            elif isinstance(field, ManyRelation):
                 sideloads[key].update(
                     set(attribute.values_list('id', flat=True)))
-            else:
-                raise ValueError(
-                    'Encountered an unexpected field class {}.  Did '
-                    'you specify a field in `sideload_fields` that is '
-                    'not a relation?'.format(field.__class__))
+
         return sideloads
 
     def to_representation(self, instance):

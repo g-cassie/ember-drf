@@ -2,9 +2,11 @@ from django.test import TestCase
 
 from drf_ember.serializers import SideloadListSerializer
 
-from tests.models import ChildModel, ParentModel, OptionalChildModel
+from tests.models import ChildModel, ParentModel, OptionalChildModel, \
+    OneToOne, ReverseOneToOne
 from tests.serializers import ChildSideloadSerializer, \
-    OptionalChildSideloadSerializer
+    OptionalChildSideloadSerializer, OneToOneSideloadSerializer, \
+    ReverseOneToOneSideloadSerializer
 
 
 class TestSideloadSerializer(TestCase):
@@ -60,6 +62,24 @@ class TestSideloadSerializer(TestCase):
         }
         self.assertEqual(result, expected)
 
+    def test_one_to_one_field(self):
+        reverse = ReverseOneToOne.objects.create()
+        one = OneToOne.objects.create(reverse_one_to_one=reverse)
+        result = OneToOneSideloadSerializer(one).data
+        expected = {
+            'one_to_one': {'id': one.pk, 'reverse_one_to_one': reverse.pk},
+            'reverse_one_to_ones': [{'id': reverse.pk, 'one_to_one': one.pk}]
+        }
+        self.assertEqual(result, expected)
+
+    def test_reverse_one_to_one_blank_field(self):
+        reverse = ReverseOneToOne.objects.create()
+        result = ReverseOneToOneSideloadSerializer(reverse).data
+        expected = {
+            'reverse_one_to_one': {'id': reverse.pk, 'one_to_one': None},
+            'one_to_ones': []
+        }
+        self.assertEqual(result, expected)
 
 class TestSideloadListSerailizer(TestCase):
 
