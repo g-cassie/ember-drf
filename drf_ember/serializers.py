@@ -83,6 +83,17 @@ class SideloadSerializerMixin(object):
             if field.source in meta.sideload_fields]
 
 
+    def get_base_key(self, singular=False):
+        meta = self.child.Meta if hasattr(self, 'child') else self.Meta
+        key = getattr(meta, 'base_key', None)
+        if key and not singular:
+            key = pluralize(key)
+        if not key:
+            model = self.base_serializer.Meta.model
+            key = self.get_sideload_key_name(model, singular=singular)
+        return key
+
+
 class SideloadListSerializer(SideloadSerializerMixin, ListSerializer):
 
     def __init__(self, *args, **kwargs):
@@ -115,8 +126,7 @@ class SideloadListSerializer(SideloadSerializerMixin, ListSerializer):
         Overrides the DRF method to add a root key and sideloads.
         """
         ret = ReturnDict(serializer=self)
-        model = self.base_serializer.Meta.model
-        key = self.get_sideload_key_name(model)
+        key = self.get_base_key()
         ret[key] = self.base_serializer.__class__(instance, many=True).data
         ret.update(self.get_sideload_objects(instance))
         return ret
@@ -174,7 +184,7 @@ class SideloadSerializer(SideloadSerializerMixin, Serializer):
             return base_result
 
         ret = ReturnDict(serializer=self)
-        key = self.get_sideload_key_name(model, singular=True)
+        key = self.get_base_key(singular=True)
         ret[key] = base_result
         ret.update(self.get_sideload_objects(instance))
         return ret

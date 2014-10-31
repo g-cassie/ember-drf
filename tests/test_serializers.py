@@ -54,6 +54,15 @@ class TestSideloadSerializer(TestCase):
         }
         self.assertEqual(result, expected)
 
+    def test_custom_basekey(self):
+        serializer = ChildSideloadSerializer()
+        serializer.Meta.base_key = 'cats'
+        result = serializer.to_representation(self.child)
+        self.assertIn('cats', result)
+        # for some reason this needs to be unset otherwise it will affect
+        # other tests.
+        serializer.Meta.base_key = None
+
     def test_optional_foreign_key_serialization(self):
         child = OptionalChildModel.objects.create()
         result = OptionalChildSideloadSerializer(child).data
@@ -91,7 +100,7 @@ class TestSideloadListSerailizer(TestCase):
             ChildModel.objects.create(parent=self.parents[1], old_parent=self.parents[2]),
             ChildModel.objects.create(parent=self.parents[0], old_parent=self.parents[1])
         ]
-        self.children.extend([ChildModel.objects.create(parent=self.parents[1], old_parent=self.parents[2]) for x in range(2000)])
+        self.children.extend([ChildModel.objects.create(parent=self.parents[1], old_parent=self.parents[2]) for x in range(5)])
 
     def test_get_sideload_ids(self):
         with self.assertNumQueries(1):
