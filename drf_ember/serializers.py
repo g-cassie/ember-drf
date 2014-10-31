@@ -36,7 +36,7 @@ class SideloadSerializerMixin(object):
                 queryset = tup[2]
             else:
                 queryset = model.objects.all()
-            result[self.get_sideload_key_name(model)] = {
+            result[self.sideload_key_names[model.__name__]] = {
                 'model': model,
                 'serializer': serializer,
                 'queryset': queryset
@@ -69,8 +69,25 @@ class SideloadSerializerMixin(object):
                 conf['queryset'].filter(id__in=ids), many=True).data
         return ret
 
+    def set_config(self, meta):
+        self.base_serializer = getattr(meta, 'base_serializer')()
+        self.models, self.sideload_key_names = {}, {}
+        relations_info = get_field_info(self.base_serializer.Meta.model).relations
+        for key, value in relations_info.items():
+            self.models[key] = value.related
+            self.sideload_key_names[value.related.__name__] = \
+                self.get_sideload_key_name(value.related)
+
+        self.sideload_fields =  [
+            field for field in self.base_serializer.fields.values()
+            if field.source in meta.sideload_fields]
+
 
 class SideloadListSerializer(SideloadSerializerMixin, ListSerializer):
+
+    def __init__(self, *args, **kwargs):
+        self.set_config(kwargs['child'].Meta)
+        return super(SideloadListSerializer, self).__init__(*args, **kwargs)
 
     def get_sideload_ids(self, data):
         """
@@ -98,22 +115,29 @@ class SideloadListSerializer(SideloadSerializerMixin, ListSerializer):
         Overrides the DRF method to add a root key and sideloads.
         """
         ret = ReturnDict(serializer=self)
-        base_serializer = getattr(self.child.Meta, 'base_serializer')
-        model = getattr(base_serializer.Meta, 'model')
-
+        model = self.base_serializer.Meta.model
         key = self.get_sideload_key_name(model)
-        ret[key] = base_serializer(instance, many=True).data
+        ret[key] = self.base_serializer.__class__(instance, many=True).data
         ret.update(self.get_sideload_objects(instance))
         return ret
 
 
 class SideloadSerializer(SideloadSerializerMixin, Serializer):
 
+    def __init__(self, *args, **kwargs):
+        if hasattr(self, 'parent'):
+            self.models = self.parent.models
+            self.base_serializer = self.parent.base_serializer
+            self.sideload_fields = self.parent.sideload_fields
+        else:
+            self.set_config(self.Meta)
+        return super(SideloadSerializer, self).__init__(*args, **kwargs)
+
     def __new__(cls, *args, **kwargs):
         # We override this method in order to automagically create
         # `SideloadListSerializer` classes instead when `many=True` is set.
         if kwargs.pop('many', False):
-            kwargs['child'] = cls()
+            kwargs['child'] = cls(*args, **kwargs)
             return SideloadListSerializer(*args, **kwargs)
         return super(Serializer, cls).__new__(cls, *args, **kwargs)
 
@@ -121,24 +145,21 @@ class SideloadSerializer(SideloadSerializerMixin, Serializer):
         """
         Returns a dictionary of model ids to sideload.
         """
-        base_serializer = getattr(self.Meta, 'base_serializer')
-        sideload_fields = getattr(self.Meta, 'sideload_fields', [])
-        fields = [field for field in base_serializer().fields.values()
-                  if field.source in sideload_fields]
-        info = get_field_info(base_serializer.Meta.model).relations
-
         sideloads = defaultdict(set)
-        for field in fields:
+        for field in self.sideload_fields:
             # we cannot use field.get_attribute as that will give us a back
             # a `PKOnlyObject`.
             assert isinstance(field, (PrimaryKeyRelatedField, ManyRelation)), \
                 ('Encountered an unexpected field class {}.  Did '
                 'you specify a field in `sideload_fields` that is '
                 'not a relation?'.format(field.__class__))
-            model = info[field.source].related
-            key = self.get_sideload_key_name(model)
+            model = self.models[field.source]
+            key = self.sideload_key_names[model.__name__]
             attribute = field.get_attribute(instance)
-            sideloads[key].add(attribute.pk if attribute else None)
+            if isinstance(attribute, list):
+                sideloads[key].update([a.pk for a in attribute])
+            else:
+                sideloads[key].add(attribute.pk if attribute else None)
 
         return sideloads
 
@@ -146,10 +167,9 @@ class SideloadSerializer(SideloadSerializerMixin, Serializer):
         """
         Overrides the DRF method to add a root key and sideloads.
         """
-        base_serializer = getattr(self.Meta, 'base_serializer')
-        model = getattr(base_serializer.Meta, 'model')
+        model = self.base_serializer.Meta.model
         is_nested = hasattr(self, 'parent') and self.parent
-        base_result = base_serializer(instance).data
+        base_result = self.base_serializer.to_representation(instance)
         if is_nested:
             return base_result
 

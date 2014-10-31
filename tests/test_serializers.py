@@ -91,6 +91,7 @@ class TestSideloadListSerailizer(TestCase):
             ChildModel.objects.create(parent=self.parents[1], old_parent=self.parents[2]),
             ChildModel.objects.create(parent=self.parents[0], old_parent=self.parents[1])
         ]
+        self.children.extend([ChildModel.objects.create(parent=self.parents[1], old_parent=self.parents[2]) for x in range(2000)])
 
     def test_get_sideload_ids(self):
         with self.assertNumQueries(1):

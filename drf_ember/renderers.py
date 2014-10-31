@@ -30,7 +30,7 @@ def convert_related_keys(data):
         for key, value in data.items():
             new_dict[key] = convert_related_keys(value)
         return new_dict
-    elif isinstance(serializer, ListSerializer):
+    elif isinstance(serializer, (ListSerializer)):
         return [convert_related_keys(i) for i in data]
 
     # when a normal serializer is reached we rename each related key

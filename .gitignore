@@ -3,6 +3,7 @@
 *~
 .*
 *.egg-info
+profile
 
 !.gitignore
 __pycache__
