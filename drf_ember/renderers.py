@@ -1,4 +1,4 @@
-from inflection import camelize
+from inflection import camelize, singularize
 
 from rest_framework.relations import PrimaryKeyRelatedField, ManyRelation
 from rest_framework.renderers import JSONRenderer
@@ -43,7 +43,7 @@ def convert_related_keys(data):
                 isinstance(field.child, PrimaryKeyRelatedField)) or \
                 isinstance(field, ManyRelation):
             name = field.field_name
-            data[name + '_ids'] = data[name]
+            data[singularize(name) + '_ids'] = data[name]
             del data[name]
     return data
 

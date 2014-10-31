@@ -39,8 +39,8 @@ class RendererTests(TestCase):
                 'old_parent_id': old_parent.id
             },
             'parent_models': [
-                {'id': p.id, 'text': p.text, 'children_ids': p.child_ids,
-                'old_children_ids': p.old_child_ids } for p in [parent, old_parent]
+                {'id': p.id, 'text': p.text, 'child_ids': p.child_ids,
+                'old_child_ids': p.old_child_ids } for p in [parent, old_parent]
             ]
         }
         assert convert_related_keys(obj) == expected
@@ -59,8 +59,8 @@ class RendererTests(TestCase):
                 'old_parent_id': c.old_parent.id} for c in children
             ],
             'parent_models': [
-                {'id': p.id, 'text': p.text, 'children_ids': p.child_ids,
-                'old_children_ids': p.old_child_ids } for p in parents
+                {'id': p.id, 'text': p.text, 'child_ids': p.child_ids,
+                'old_child_ids': p.old_child_ids } for p in parents
             ]
 
         }

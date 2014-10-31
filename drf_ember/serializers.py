@@ -71,6 +71,7 @@ class SideloadSerializerMixin(object):
 
     def set_config(self, meta):
         self.base_serializer = getattr(meta, 'base_serializer')()
+        sideload_fields = getattr(meta, 'sideload_fields', [])
         self.models, self.sideload_key_names = {}, {}
         relations_info = get_field_info(self.base_serializer.Meta.model).relations
         for key, value in relations_info.items():
@@ -80,7 +81,7 @@ class SideloadSerializerMixin(object):
 
         self.sideload_fields =  [
             field for field in self.base_serializer.fields.values()
-            if field.source in meta.sideload_fields]
+            if field.source in sideload_fields]
 
 
     def get_base_key(self, singular=False):
