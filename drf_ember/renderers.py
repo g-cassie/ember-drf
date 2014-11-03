@@ -34,14 +34,14 @@ def convert_related_keys(data):
         for field in serializer.fields.values():
             if isinstance(field, (PrimaryKeyRelatedField)):
                 name = field.field_name
-                if hasattr(data, name):
+                if name in data:
                     data[name + '_id'] = data[name]
                     del data[name]
             elif (isinstance(field, ListSerializer) and \
                     isinstance(field.child, PrimaryKeyRelatedField)) or \
                     isinstance(field, ManyRelation):
                 name = field.field_name
-                if hasattr(data, name):
+                if name in data:
                     data[singularize(name) + '_ids'] = data[name]
                     del data[name]
         return data
