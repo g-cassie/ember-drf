@@ -2,8 +2,9 @@ from collections import defaultdict
 from inflection import pluralize, underscore
 
 from rest_framework.relations import PrimaryKeyRelatedField, ManyRelation
-from rest_framework.serializers import ReturnDict, \
-    ListSerializer, Serializer
+from rest_framework.serializers import (
+    ReturnDict, ListSerializer, Serializer, ValidationError
+)
 from rest_framework.utils.model_meta import get_field_info
 
 
@@ -178,7 +179,6 @@ class SideloadSerializer(SideloadSerializerMixin, Serializer):
         """
         Overrides the DRF method to add a root key and sideloads.
         """
-        model = self.base_serializer.Meta.model
         is_nested = hasattr(self, 'parent') and self.parent
         base_result = self.base_serializer.to_representation(instance)
         if is_nested:
@@ -189,3 +189,17 @@ class SideloadSerializer(SideloadSerializerMixin, Serializer):
         ret[key] = base_result
         ret.update(self.get_sideload_objects(instance))
         return ret
+
+    def to_internal_value(self, data):
+        key = self.get_base_key(singular=True)
+        if not key in data:
+            raise ValidationError(
+                'You must nest the attributes for the new object '
+                'under a root key: %s' % key)
+        return self.base_serializer.to_internal_value(data[key])
+
+    def create(self, validated_data):
+        return self.base_serializer.create(validated_data)
+
+    def update(self, instance, validated_data):
+        return self.base_serializer.update(instance, validated_data)

@@ -2,6 +2,8 @@ from django.test import TestCase
 
 from drf_ember.serializers import SideloadListSerializer
 
+from rest_framework.serializers import ValidationError
+
 from tests.models import ChildModel, ParentModel, OptionalChildModel, \
     OneToOne, ReverseOneToOne
 from tests.serializers import ChildSideloadSerializer, \
@@ -91,7 +93,72 @@ class TestSideloadSerializer(TestCase):
         }
         self.assertEqual(result, expected)
 
-class TestSideloadListSerailizer(TestCase):
+class TestSideloadSerializerCreate(TestCase):
+
+    def setUp(self):
+        self.parent = ParentModel.objects.create()
+        self.old_parent = ParentModel.objects.create()
+        self.payload = {'child_model':
+            {'parent': self.parent.pk, 'old_parent': self.old_parent.pk }}
+
+    def test_deserialize_requires_root_key(self):
+        with self.assertRaises(ValidationError):
+            ChildSideloadSerializer().to_internal_value(
+                self.payload['child_model'])
+
+    def test_deserialize_field_validation_works(self):
+        self.payload['child_model'].pop('parent')
+        with self.assertRaises(ValidationError):
+            ChildSideloadSerializer().to_internal_value(
+                self.payload['child_model'])
+
+    def test_deserialize(self):
+        serializer = ChildSideloadSerializer(data=self.payload)
+        self.assertTrue(serializer.is_valid)
+
+    def test_create(self):
+        serializer = ChildSideloadSerializer(data=self.payload)
+        self.assertEqual(ChildModel.objects.count(), 0)
+        serializer.is_valid()
+        serializer.save()
+        self.assertEqual(ChildModel.objects.count(), 1)
+
+
+class TestSideloadSerializerUpdate(TestCase):
+
+    def setUp(self):
+        self.parent = ParentModel.objects.create()
+        self.old_parent = ParentModel.objects.create()
+        self.child = ChildModel.objects.create(
+            parent=self.parent, old_parent=self.old_parent)
+        # change `old_parent` to `self.parent`
+        self.payload = {'child_model':
+            {'id': self.child.pk, 'parent': self.parent.pk,
+            'old_parent': self.parent.pk }}
+
+    def test_deserialize_field_validation_works(self):
+        self.payload['child_model'].pop('parent')
+        serializer = ChildSideloadSerializer(
+            data=self.payload['child_model'], instance=self.child)
+        self.assertFalse(serializer.is_valid())
+
+    def test_deserialize(self):
+        serializer = ChildSideloadSerializer(
+            instance=self.child, data=self.payload)
+        self.assertTrue(serializer.is_valid)
+
+    def test_create(self):
+        serializer = ChildSideloadSerializer(
+            instance=self.child, data=self.payload)
+        self.assertEqual(
+            ChildModel.objects.get(pk=self.child.pk).old_parent, self.old_parent)
+        serializer.is_valid()
+        serializer.save()
+        self.assertEqual(
+            ChildModel.objects.get(pk=self.child.pk).old_parent, self.parent)
+
+
+class TestSideloadListSerializer(TestCase):
 
     def setUp(self):
         self.parents = [ParentModel.objects.create() for x in range(3)]
