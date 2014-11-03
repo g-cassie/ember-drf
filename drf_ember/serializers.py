@@ -7,6 +7,8 @@ from rest_framework.serializers import (
 )
 from rest_framework.utils.model_meta import get_field_info
 
+from drf_ember.exceptions import ActiveModelValidationError
+
 
 class SideloadSerializerMixin(object):
 
@@ -203,3 +205,19 @@ class SideloadSerializer(SideloadSerializerMixin, Serializer):
 
     def update(self, instance, validated_data):
         return self.base_serializer.update(instance, validated_data)
+
+    def is_valid(self, raise_exception=False):
+        """
+        Override builtin DRF method to reformat errors and use HTTP 422.
+
+        This is kind of hacky, hopefully there will be a better way to do this
+        soon.
+        """
+        try:
+            result = super(SideloadSerializer, self).is_valid(raise_exception)
+        except ValidationError:
+            errors = ReturnDict({'errors': self._errors}, serializer=self)
+            raise ActiveModelValidationError(errors)
+        self._errors = ReturnDict({'errors': self._errors}, serializer=self) \
+            if self._errors else {}
+        return not bool(self._errors)

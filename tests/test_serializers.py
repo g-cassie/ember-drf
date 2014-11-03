@@ -1,5 +1,6 @@
 from django.test import TestCase
 
+from drf_ember.exceptions import ActiveModelValidationError
 from drf_ember.serializers import SideloadListSerializer
 
 from rest_framework.serializers import ValidationError
@@ -139,15 +140,34 @@ class TestSideloadSerializerUpdate(TestCase):
     def test_deserialize_field_validation_works(self):
         self.payload['child_model'].pop('parent')
         serializer = ChildSideloadSerializer(
-            data=self.payload['child_model'], instance=self.child)
+            data=self.payload, instance=self.child)
         self.assertFalse(serializer.is_valid())
+
+    def test_errors_format(self):
+        self.payload['child_model'].pop('parent')
+        serializer = ChildSideloadSerializer(
+            data=self.payload, instance=self.child)
+        self.assertFalse(serializer.is_valid())
+        self.assertEqual(serializer.errors,
+            {'errors': {'parent': ['This field is required.']}})
+
+    def test_errors_status_code(self):
+        self.payload['child_model'].pop('parent')
+        serializer = ChildSideloadSerializer(
+            data=self.payload, instance=self.child)
+        with self.assertRaises(ActiveModelValidationError):
+            serializer.is_valid(True)
+        try:
+            serializer.is_valid(True)
+        except ActiveModelValidationError as e:
+            self.assertEqual(e.status_code, 422)
 
     def test_deserialize(self):
         serializer = ChildSideloadSerializer(
             instance=self.child, data=self.payload)
         self.assertTrue(serializer.is_valid)
 
-    def test_create(self):
+    def test_update(self):
         serializer = ChildSideloadSerializer(
             instance=self.child, data=self.payload)
         self.assertEqual(
