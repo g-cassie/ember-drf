@@ -2,7 +2,7 @@ from django.test import TestCase
 
 from rest_framework.renderers import JSONRenderer
 
-from drf_ember.renderers import EmberJSONRenderer, convert_related_keys
+from drf_ember.renderers import EmberJSONRenderer, convert_to_active_model_json
 
 from tests.serializers import ChildSideloadSerializer
 from tests.models import ChildModel, ParentModel
@@ -43,7 +43,7 @@ class RendererTests(TestCase):
                 'old_child_ids': p.old_child_ids } for p in [parent, old_parent]
             ]
         }
-        assert convert_related_keys(obj) == expected
+        assert convert_to_active_model_json(obj) == expected
 
     def test_active_model_json_renderer(TestCase):
         parents = [ParentModel.objects.create() for x in range(3)]
@@ -64,4 +64,4 @@ class RendererTests(TestCase):
             ]
 
         }
-        assert convert_related_keys(obj) == expected
+        assert convert_to_active_model_json(obj) == expected

@@ -31,25 +31,21 @@ class ParentSerializer(serializers.ModelSerializer):
 
 class ChildSideloadSerializer(SideloadSerializer):
     class Meta:
-        sideload_fields = ['parent', 'old_parent']
         base_serializer = ChildSerializer
         sideloads = [(ParentModel, ParentSerializer, ParentModel.objects.prefetch_related('children', 'old_children'))]
 
 
 class OptionalChildSideloadSerializer(SideloadSerializer):
     class Meta:
-        sideload_fields = ['parent']
         base_serializer = OptionalChildSerializer
         sideloads = [(ParentModel, ParentSerializer)]
 
 class OneToOneSideloadSerializer(SideloadSerializer):
     class Meta:
-        sideload_fields = ['reverse_one_to_one']
         base_serializer = OneToOneSerializer
         sideloads = [(ReverseOneToOne, ReverseOneToOneSerializer)]
 
 class ReverseOneToOneSideloadSerializer(SideloadSerializer):
     class Meta:
-        sideload_fields = ['one_to_one']
         base_serializer = ReverseOneToOneSerializer
         sideloads = [(OneToOne, OneToOneSerializer)]

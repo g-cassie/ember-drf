@@ -58,9 +58,9 @@ class TestSideloadSerializer(TestCase):
         self.assertEqual(result, expected)
 
     def test_custom_basekey(self):
-        serializer = ChildSideloadSerializer()
+        serializer = ChildSideloadSerializer
         serializer.Meta.base_key = 'cats'
-        result = serializer.to_representation(self.child)
+        result = serializer().to_representation(self.child)
         self.assertIn('cats', result)
         # for some reason this needs to be unset otherwise it will affect
         # other tests.
