@@ -81,7 +81,7 @@ class SideloadSerializerMixin(object):
             self.base_key = get_ember_json_key_for_model(self.model, True)
 
         configs = []
-        for conf in meta.sideloads:
+        for conf in getattr(meta, 'sideloads', []):
             assert isinstance(conf, tuple) and len(conf) >= 2 \
                 and len(conf) <= 3, (
                 '`Meta.sideloads` must be a list of tuples in the following '
