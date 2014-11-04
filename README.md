@@ -4,105 +4,145 @@ This project aims to create a python package that makes it simple to build an
 API that is compatible with
 [Ember Data](https://github.com/emberjs/data)
 out of the box. While initially the user will still be required to configure
-their urls and serializers in a certain way for them to work properly, the 
+their urls and serializers in a certain way for them to work properly, the
 goal is to make this as pluggable as possible.
 
-## Structure
-There are currently two parts to the project:
-1. Serializer
-2. Renderer
-These components should be sufficient to match all of Ember Data's
-specifications other than it's url scheme which the user must currently
-configure manually in their router.py file.  We will look at ways to take
-care of this as well soon.
+# Installation
 
-## Serializer
+TODO
 
-`drf_ember` uses Serializers to make structural modifications to the default
-DRF responses (as opposed to purely aesthetic modifications that are handled by
-renderers).  The primary structural difference between Ember Data and
-out of the box DRF are as follows:
+# How to Use
 
-1. Responses from the api are nested under a root key.
+The following is a complete list of steps to configure your api to work with
+Ember-Data out of the box.
 
-2. Related records can be sideloaded under other root keys.
+1. Serializers
 
-`drf_ember` supports the above structural changes by providing the
-SideloadSerializer base class.  This must be used in conjunction with
-one or more typical `ModelSerializers`.  Despite the name, SideloadSerializer
-may be used without any sideloading options in order to simply nest the
-api response under a root key.
+You must expose only subclasses of `SideloadSerializer` from your viewsets in
+order for them to work properly with Ember-Data.
 
-### Serializer Example
-
-Give these models:
 ```python
-class Basket(models.Model):
-    text = models.CharField(max_length=200, default='Fruit Basket')
+# serializers.py
+from rest_framework.serializers import ModelSerializer
+from drf_ember.serializers import SideloadSerializer
+from my_app.models import Fruit
 
-class Fruit(models.Model):
-    basket = models.ForeignKey(Basket)
-    previous_basket = models.ForeignKey(Basket, related_name='former_fruits')
-```
-And these serializers:
-```python
-class BasketSerializer(models.Model):
-    class Meta:
-        model = Basket
-
-class Fruit(models.Model):
+class FruitSerializer(ModelSerializer):
     class Meta:
         model = Fruit
-```
+        fields = ('basket', 'tree')
 
-You can create a fruit serializer that sideloads baskets in the correct format
-for Ember Data as follows:
-```python
 class FruitSideloadSerializer(SideloadSerializer):
     class Meta:
-        sideload_fields = ['basket', 'previous_basket']
         base_serializer = FruitSerializer
         sideloads = [
             (Basket, BasketSerializer)
         ]
-
 ```
-This will produce output in the following format:
 
-```json
-{
-    fruits: [
-        {id: 1, basket: 1, previous_basket: 2},
-        {id: 2, basket: 2, previous_basket: 1},
-        {id: 3, basket: 1, previous_basket: 1},
-    ],
-    baskets: [
-        {id: 1, title: 'Fruit Basket'},
-        {id: 2, title: 'Fruit Basket'},
-    ]
+```python
+# viewsets.py
+class FruitViewset(ModelViewSet):
+    model = Fruit
+    serializer_class = FruitSideloadSerializer
+```
+
+Assuming that basket and tree are both one-to-many relationships, the
+Ember-Data model could look like this:
+
+```javascript
+export default DS.Model.extend({
+    basket: DS.belongsTo('basket'),
+    tree: DS.belongsTo('tree', {async: true}) // async because no sideloads
+});
+```
+
+SideloadSerializer also supports Embedded Records using the standard
+`rest_framework` syntax.  Information on using EmbeddedRecords in Ember can
+be found [here](http://emberjs.com/api/data/classes/DS.EmbeddedRecordsMixin.html).
+
+2. Renders/Parsers
+
+Ember-Data offers two built-in serializers, `DS.EmberJSONSerializer` and
+`DS.ActiveRecordJSONSerializer`.  `DS.EmberJSONSerializers` is enabled by
+default.  However, you may want to use ActiveRecordJSONSerializer as it
+conforms more closely to the standard DRF output (e.g. underscored urls and
+properties).  Either way you will need to configure DRF to use the
+renderers and parsers provided by `drf_ember`.
+
+```python
+# settings.py
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': (
+        # Choose one:
+        'drf_ember.renderers.ActiveModelJSONRenderer',
+        'drf_ember.renderers.EmberJSONRenderer',
+
+        # leave this
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    ),
+    'DEFAULT_PARSER_CLASSES': (
+        # Choose one:
+        'drf_ember.parsers.ActiveModelJSONParser',
+        'drf_ember.parsers.EmberJSONRenderer',
+
+        # leave this
+        'rest_framework.parsers.MultiPartParser',
+    ),
+    # ... include other REST_FRAMEWORK settings as needed
 }
-```
-Note that the serializer does not convert the underscored attributes to camel
-case. That functionality is decoupled and put in the EmberJSONRenderer.
-
-## Renderers
-
-This project uses renderers to make changes that are purely aesthetic (as opposed to structural).  There are two renders:
-
-1. EmberJSONRenderer: For use with Ember Data's built in JSONSerializer.
-
-2. Active ModelJSONRenderer: For use with Ember Data's built in
-    ActiveModelSerializer.
 
 
-Details on how to use renders can be found
+Additional details on how to use renders can be found
 [here](http://www.django-rest-framework.org/api-guide/renderers)
 
-# Notes
+3. Urls
 
-## DRF 3.0 Installation
-Until DRF 3.0 is released it will need to be installed using
-the following command:
+Ember will not by default append a trailing slash to urls.  [You can turn off
+trailing slashes in django](https://docs.djangoproject.com/en/dev/ref/settings/#append-slash).  It is probably less intrusive to
+make this change on the Ember side however:
+
+```javascript
+# adapters/application.js
+import DS from "ember-data";
+// alternatively, use DS.Adapter if you do not want to use ActiveModel
+export default DS.ActiveModelAdapter.extend({
+    buildURL: function(type, id, record){
+        return this._super(type, id, record) + '/';
+    }
+});
 ```
- pip install https://github.com/tomchristie/django-rest-framework/archive/version-3.0.zip
+
+4. CSRF
+
+This is really outside of the scope of this project; however, in most cases
+you will need to configure the Ember adapter to include a CSRF Token.  The
+CSRF_TOKEN_VARIABLE is probably most easily set by embedding the csrf
+token into the index.html template.
+
+```javascript
+# adapters/application.js
+import DS from "ember-data";
+// alternatively, use DS.Adapter if you do not want to use ActiveModel
+export default DS.ActiveModelAdapter.extend({
+    headers: {
+        'X-CSRFToken': CSRF_TOKEN_VARIABLE
+    }
+});
 ```
+
+5. Coalescing Find Requests
+
+Ember-Data has a feature where it can [coalesce multiple single find requets
+into a single query](http://emberjs.com/blog/2014/08/18/ember-data-1-0-beta-9-released.html).  To support this you will need to add `drf_ember.filters.CoallesceIDsFilterBackend`
+to your FILTER_BACKENDS settings.
+
+```python
+# settings.py
+REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKENDS': (
+        'rest_framework.filters.DjangoFilterBackend',
+        'drf_ember.filters.CoallesceIDsFilterBackend'
+    )
+    # ... include other REST_FRAMEWORK settings as needed
+}
