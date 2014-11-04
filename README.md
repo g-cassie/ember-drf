@@ -16,7 +16,7 @@ TODO
 The following is a complete list of steps to configure your api to work with
 Ember-Data out of the box.
 
-1. Serializers
+## 1. Serializers
 
 You must expose only subclasses of `SideloadSerializer` from your viewsets in
 order for them to work properly with Ember-Data.
@@ -61,7 +61,7 @@ SideloadSerializer also supports Embedded Records using the standard
 `rest_framework` syntax.  Information on using EmbeddedRecords in Ember can
 be found [here](http://emberjs.com/api/data/classes/DS.EmbeddedRecordsMixin.html).
 
-2. Renders/Parsers
+## 2. Renders/Parsers
 
 Ember-Data offers two built-in serializers, `DS.EmberJSONSerializer` and
 `DS.ActiveRecordJSONSerializer`.  `DS.EmberJSONSerializers` is enabled by
@@ -96,7 +96,7 @@ REST_FRAMEWORK = {
 Additional details on how to use renders can be found
 [here](http://www.django-rest-framework.org/api-guide/renderers)
 
-3. Urls
+## 3. Urls
 
 Ember will not by default append a trailing slash to urls.  [You can turn off
 trailing slashes in django](https://docs.djangoproject.com/en/dev/ref/settings/#append-slash).  It is probably less intrusive to
@@ -113,7 +113,7 @@ export default DS.ActiveModelAdapter.extend({
 });
 ```
 
-4. CSRF
+## 4. CSRF
 
 This is really outside of the scope of this project; however, in most cases
 you will need to configure the Ember adapter to include a CSRF Token.  The
@@ -131,7 +131,7 @@ export default DS.ActiveModelAdapter.extend({
 });
 ```
 
-5. Coalescing Find Requests
+## 5. Coalescing Find Requests
 
 Ember-Data has a feature where it can [coalesce multiple single find requets
 into a single query](http://emberjs.com/blog/2014/08/18/ember-data-1-0-beta-9-released.html).  To support this you will need to add `ember_drf.filters.CoallesceIDsFilterBackend`
