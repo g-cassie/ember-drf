@@ -91,7 +91,7 @@ REST_FRAMEWORK = {
     ),
     # ... include other REST_FRAMEWORK settings as needed
 }
-
+```
 
 Additional details on how to use renders can be found
 [here](http://www.django-rest-framework.org/api-guide/renderers)
