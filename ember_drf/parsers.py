@@ -1,8 +1,6 @@
 from rest_framework.parsers import JSONParser
 
-from inflection import pluralize, underscore
-
-from drf_ember.utils import (
+from ember_drf.utils import (
     convert_from_ember_json, convert_from_active_model_json
 )
 

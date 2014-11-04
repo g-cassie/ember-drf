@@ -1,7 +1,7 @@
 from django.test import TestCase
 
-from drf_ember.exceptions import ActiveModelValidationError
-from drf_ember.serializers import SideloadListSerializer
+from ember_drf.exceptions import ActiveModelValidationError
+from ember_drf.serializers import SideloadListSerializer
 
 from rest_framework.serializers import ValidationError
 

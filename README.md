@@ -24,7 +24,7 @@ order for them to work properly with Ember-Data.
 ```python
 # serializers.py
 from rest_framework.serializers import ModelSerializer
-from drf_ember.serializers import SideloadSerializer
+from ember_drf.serializers import SideloadSerializer
 from my_app.models import Fruit
 
 class FruitSerializer(ModelSerializer):
@@ -68,23 +68,23 @@ Ember-Data offers two built-in serializers, `DS.EmberJSONSerializer` and
 default.  However, you may want to use ActiveRecordJSONSerializer as it
 conforms more closely to the standard DRF output (e.g. underscored urls and
 properties).  Either way you will need to configure DRF to use the
-renderers and parsers provided by `drf_ember`.
+renderers and parsers provided by `ember_drf`.
 
 ```python
 # settings.py
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': (
         # Choose one:
-        'drf_ember.renderers.ActiveModelJSONRenderer',
-        'drf_ember.renderers.EmberJSONRenderer',
+        'ember_drf.renderers.ActiveModelJSONRenderer',
+        'ember_drf.renderers.EmberJSONRenderer',
 
         # leave this
         'rest_framework.renderers.BrowsableAPIRenderer',
     ),
     'DEFAULT_PARSER_CLASSES': (
         # Choose one:
-        'drf_ember.parsers.ActiveModelJSONParser',
-        'drf_ember.parsers.EmberJSONRenderer',
+        'ember_drf.parsers.ActiveModelJSONParser',
+        'ember_drf.parsers.EmberJSONRenderer',
 
         # leave this
         'rest_framework.parsers.MultiPartParser',
@@ -134,7 +134,7 @@ export default DS.ActiveModelAdapter.extend({
 5. Coalescing Find Requests
 
 Ember-Data has a feature where it can [coalesce multiple single find requets
-into a single query](http://emberjs.com/blog/2014/08/18/ember-data-1-0-beta-9-released.html).  To support this you will need to add `drf_ember.filters.CoallesceIDsFilterBackend`
+into a single query](http://emberjs.com/blog/2014/08/18/ember-data-1-0-beta-9-released.html).  To support this you will need to add `ember_drf.filters.CoallesceIDsFilterBackend`
 to your FILTER_BACKENDS settings.
 
 ```python
@@ -142,7 +142,7 @@ to your FILTER_BACKENDS settings.
 REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': (
         'rest_framework.filters.DjangoFilterBackend',
-        'drf_ember.filters.CoallesceIDsFilterBackend'
+        'ember_drf.filters.CoallesceIDsFilterBackend'
     )
     # ... include other REST_FRAMEWORK settings as needed
 }

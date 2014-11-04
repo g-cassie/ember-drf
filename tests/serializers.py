@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from drf_ember.serializers import SideloadSerializer
+from ember_drf.serializers import SideloadSerializer
 
 from tests.models import ChildModel, ParentModel, OptionalChildModel, \
     OneToOne, ReverseOneToOne

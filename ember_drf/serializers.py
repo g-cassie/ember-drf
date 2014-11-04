@@ -6,7 +6,7 @@ from rest_framework.serializers import (
 )
 from rest_framework.utils.model_meta import get_field_info
 
-from drf_ember.exceptions import ActiveModelValidationError
+from ember_drf.exceptions import ActiveModelValidationError
 
 
 def get_ember_json_key_for_model(model, singular=False):

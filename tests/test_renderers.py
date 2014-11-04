@@ -2,7 +2,7 @@ from django.test import TestCase
 
 from rest_framework.renderers import JSONRenderer
 
-from drf_ember.renderers import EmberJSONRenderer, convert_to_active_model_json
+from ember_drf.renderers import EmberJSONRenderer, convert_to_active_model_json
 
 from tests.serializers import ChildSideloadSerializer
 from tests.models import ChildModel, ParentModel

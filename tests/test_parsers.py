@@ -1,4 +1,4 @@
-from drf_ember.parsers import ActiveModelJSONParser, EmberJSONParser
+from ember_drf.parsers import ActiveModelJSONParser, EmberJSONParser
 from rest_framework.compat import StringIO
 
 

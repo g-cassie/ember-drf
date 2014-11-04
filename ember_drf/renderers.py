@@ -1,6 +1,6 @@
 from rest_framework.renderers import JSONRenderer
 
-from drf_ember.utils import (
+from ember_drf.utils import (
     convert_to_active_model_json, convert_to_ember_json
 )
 

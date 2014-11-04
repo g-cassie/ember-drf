@@ -3,7 +3,7 @@ from inflection import camelize, singularize, pluralize, underscore
 from rest_framework.relations import PrimaryKeyRelatedField, ManyRelation
 from rest_framework.serializers import ListSerializer
 
-from drf_ember.serializers import SideloadListSerializer, SideloadSerializer
+from ember_drf.serializers import SideloadListSerializer, SideloadSerializer
 
 def convert_to_ember_json(data):
     """Convert all dictionary keys to camel case."""
