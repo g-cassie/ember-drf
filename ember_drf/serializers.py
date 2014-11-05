@@ -76,7 +76,7 @@ class SideloadSerializerMixin(object):
         self.base_serializer = meta.base_serializer()
         self.model = self.base_serializer.Meta.model
         self.sideloads = []
-        self.base_key = getattr(meta, 'base_key', None)
+        self.base_key = getattr(self.base_serializer.Meta, 'base_key', None)
         if not self.base_key:
             self.base_key = get_ember_json_key_for_model(self.model, True)
 
@@ -99,11 +99,12 @@ class SideloadSerializerMixin(object):
                 conf = configs[[t[0] for t in configs].index(info.related)]
             except ValueError:
                 continue
-            field = fields[
-                [f.source for f in fields].index(field_name)]
+            field = fields[[f.source for f in fields].index(field_name)]
+            key_name = getattr(conf[1].Meta, 'base_key',
+                               underscore(conf[0].__name__))
             self.sideloads.append(Sideload(
                 field=field, model=conf[0], serializer=conf[1],
-                queryset=conf[2], key_name=underscore(pluralize(conf[0].__name__))
+                queryset=conf[2], key_name=pluralize(key_name)
             ))
 
 

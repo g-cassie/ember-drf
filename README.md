@@ -61,7 +61,19 @@ SideloadSerializer also supports Embedded Records using the standard
 `rest_framework` syntax.  Information on using EmbeddedRecords in Ember can
 be found [here](http://emberjs.com/api/data/classes/DS.EmbeddedRecordsMixin.html).
 
-## 2. Renders/Parsers
+### JSON Keys
+
+The json keys used are derived from the model name using the same methodology
+as in ember.  They can be overridden by setting the `base_key` property on the
+rest_framework.serializer.ModelSerializer subclass:
+
+```
+class FruitSerializer(ModelSerializer):
+    class Meta:
+        base_key = 'tasty_fruit'
+```
+
+## 2. Renderers/Parsers
 
 Ember-Data offers two built-in serializers, `DS.EmberJSONSerializer` and
 `DS.ActiveRecordJSONSerializer`.  `DS.EmberJSONSerializers` is enabled by

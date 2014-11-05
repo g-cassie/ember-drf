@@ -9,7 +9,7 @@ from tests.models import ChildModel, ParentModel, OptionalChildModel, \
     OneToOne, ReverseOneToOne
 from tests.serializers import ChildSideloadSerializer, \
     OptionalChildSideloadSerializer, OneToOneSideloadSerializer, \
-    ReverseOneToOneSideloadSerializer
+    ReverseOneToOneSideloadSerializer, ChildSerializer
 
 
 class TestSideloadSerializer(TestCase):
@@ -59,12 +59,12 @@ class TestSideloadSerializer(TestCase):
 
     def test_custom_basekey(self):
         serializer = ChildSideloadSerializer
-        serializer.Meta.base_key = 'cats'
+        ChildSerializer.Meta.base_key = 'cat'
         result = serializer().to_representation(self.child)
-        self.assertIn('cats', result)
+        self.assertIn('cat', result)
         # for some reason this needs to be unset otherwise it will affect
         # other tests.
-        serializer.Meta.base_key = None
+        ChildSerializer.Meta.base_key = None
 
     def test_optional_foreign_key_serialization(self):
         child = OptionalChildModel.objects.create()
