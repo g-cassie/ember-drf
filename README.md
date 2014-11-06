@@ -158,3 +158,18 @@ REST_FRAMEWORK = {
     )
     # ... include other REST_FRAMEWORK settings as needed
 }
+
+## 6. Errors Formatting
+
+Ember-Data expects errors to be nested in an `errors` key and to have a 422
+status code.  To accomplish this `ember_drf` provides a custom exception
+handler. To implement it you need to change the `EXCEPTION_HANDLER` setting
+as follows:
+
+```python
+# settings.py
+REST_FRAMEWORK = {
+  'EXCEPTION_HANDLER': 'ember_drf.views.exception_handler'
+    # ... include other REST_FRAMEWORK settings as needed
+}
+```

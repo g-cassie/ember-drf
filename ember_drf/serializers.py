@@ -73,13 +73,7 @@ class SideloadSerializerMixin(object):
         """
         Assemble configuration for each sideload.
         """
-        self.base_serializer = meta.base_serializer()
-        self.model = self.base_serializer.Meta.model
         self.sideloads = []
-        self.base_key = getattr(self.base_serializer.Meta, 'base_key', None)
-        if not self.base_key:
-            self.base_key = get_ember_json_key_for_model(self.model, True)
-
         configs = []
         for conf in getattr(meta, 'sideloads', []):
             assert isinstance(conf, tuple) and len(conf) >= 2 \
@@ -92,7 +86,7 @@ class SideloadSerializerMixin(object):
             queryset = conf[0].objects.all() if (len(conf) == 2) else conf[2]
             configs.append((model, serializer, queryset))
 
-        relations = get_field_info(self.base_serializer.Meta.model).relations
+        relations = get_field_info(self.model).relations
         fields = self.base_serializer.fields.values()
         for field_name, info in relations.items():
             try:
@@ -111,7 +105,12 @@ class SideloadSerializerMixin(object):
 class SideloadListSerializer(SideloadSerializerMixin, ListSerializer):
 
     def __init__(self, *args, **kwargs):
-        self._configure_sideloads(kwargs['child'].Meta)
+        meta = kwargs['child'].Meta
+        self.base_serializer = meta.base_serializer()
+        self.model = self.base_serializer.Meta.model
+        self.base_key = getattr(self.base_serializer.Meta, 'base_key',
+                                get_ember_json_key_for_model(self.model, True))
+        self._configure_sideloads(meta)
         return super(SideloadListSerializer, self).__init__(*args, **kwargs)
 
     def get_sideload_ids(self, data):
@@ -147,7 +146,7 @@ class SideloadListSerializer(SideloadSerializerMixin, ListSerializer):
 
 class SideloadSerializer(SideloadSerializerMixin, Serializer):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, instance=None, data=None, **kwargs):
         """
         Setup the SideloadSerializer and configure it.
 
@@ -161,8 +160,20 @@ class SideloadSerializer(SideloadSerializerMixin, Serializer):
             self.base_key = self.parent.base_key
             self.base_key_plural = self.parent.base_key_plural
         else:
+            base_serializer = self.Meta.base_serializer
+            self.model = base_serializer.Meta.model
+            self.base_key = getattr(base_serializer.Meta, 'base_key',
+                get_ember_json_key_for_model(self.model, True))
+            if data:
+                if not self.base_key in data:
+                    raise ValidationError(
+                        'You must nest the attributes for the new object '
+                        'under a root key: %s' % self.base_key)
+                data = data[self.base_key]
+            self.base_serializer = base_serializer(
+                instance=instance, data=data, **kwargs)
             self._configure_sideloads(self.Meta)
-        return super(SideloadSerializer, self).__init__(*args, **kwargs)
+        return super(SideloadSerializer, self).__init__(instance, data, **kwargs)
 
     def __new__(cls, *args, **kwargs):
         """
@@ -206,36 +217,26 @@ class SideloadSerializer(SideloadSerializerMixin, Serializer):
         """
         Overrides the DRF method to expect a root key.
         """
-        if not self.base_key in data:
-            raise ValidationError(
-                'You must nest the attributes for the new object '
-                'under a root key: %s' % self.base_key)
-        return self.base_serializer.to_internal_value(data[self.base_key])
+        return self.base_serializer.to_internal_value(data=data)
 
     def create(self, validated_data):
-        """
-        Proxy `create()` calls to `Meta.base_serializer`.
-        """
+        """Proxy `create()` calls to `Meta.base_serializer`. """
         return self.base_serializer.create(validated_data)
 
     def update(self, instance, validated_data):
-        """
-        Proxy `update()` calls to `Meta.base_serializer`.
-        """
+        """Proxy `update()` calls to `Meta.base_serializer`. """
         return self.base_serializer.update(instance, validated_data)
 
     def is_valid(self, raise_exception=False):
-        """
-        Override builtin DRF method to reformat errors and use HTTP 422.
+        """Proxy `.is_valid()` to `Meta.base_serializer`. """
+        return self.base_serializer.is_valid(raise_exception)
 
-        This is kind of hacky, hopefully there will be a better way to do this
-        soon.
-        """
-        try:
-            super(SideloadSerializer, self).is_valid(raise_exception)
-        except ValidationError:
-            errors = ReturnDict({'errors': self._errors}, serializer=self)
-            raise ActiveModelValidationError(errors)
-        self._errors = ReturnDict({'errors': self._errors}, serializer=self) \
-            if self._errors else {}
-        return not bool(self._errors)
+    @property
+    def errors(self):
+        """Proxy `.errors` to `Meta.base_serializer`. """
+        return self.base_serializer.errors
+
+    @property
+    def validated_data(self):
+        """Proxy `.errors` to `Meta.base_serializer`. """
+        return self.base_serializer.validated_data

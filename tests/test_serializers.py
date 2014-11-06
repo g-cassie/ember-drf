@@ -1,7 +1,7 @@
 from django.test import TestCase
 
-from ember_drf.exceptions import ActiveModelValidationError
 from ember_drf.serializers import SideloadListSerializer
+from ember_drf.views import exception_handler
 
 from rest_framework.serializers import ValidationError
 
@@ -64,7 +64,7 @@ class TestSideloadSerializer(TestCase):
         self.assertIn('cat', result)
         # for some reason this needs to be unset otherwise it will affect
         # other tests.
-        ChildSerializer.Meta.base_key = None
+        del ChildSerializer.Meta.base_key
 
     def test_optional_foreign_key_serialization(self):
         child = OptionalChildModel.objects.create()
@@ -104,14 +104,12 @@ class TestSideloadSerializerCreate(TestCase):
 
     def test_deserialize_requires_root_key(self):
         with self.assertRaises(ValidationError):
-            ChildSideloadSerializer().to_internal_value(
-                self.payload['child_model'])
+            ChildSideloadSerializer(data=self.payload['child_model'])
 
     def test_deserialize_field_validation_works(self):
         self.payload['child_model'].pop('parent')
         with self.assertRaises(ValidationError):
-            ChildSideloadSerializer().to_internal_value(
-                self.payload['child_model'])
+            ChildSideloadSerializer(data=self.payload['child_model'])
 
     def test_deserialize(self):
         serializer = ChildSideloadSerializer(data=self.payload)
@@ -143,24 +141,17 @@ class TestSideloadSerializerUpdate(TestCase):
             data=self.payload, instance=self.child)
         self.assertFalse(serializer.is_valid())
 
-    def test_errors_format(self):
+    def test_errors_response_format(self):
         self.payload['child_model'].pop('parent')
         serializer = ChildSideloadSerializer(
             data=self.payload, instance=self.child)
-        self.assertFalse(serializer.is_valid())
-        self.assertEqual(serializer.errors,
-            {'errors': {'parent': ['This field is required.']}})
-
-    def test_errors_status_code(self):
-        self.payload['child_model'].pop('parent')
-        serializer = ChildSideloadSerializer(
-            data=self.payload, instance=self.child)
-        with self.assertRaises(ActiveModelValidationError):
-            serializer.is_valid(True)
         try:
             serializer.is_valid(True)
-        except ActiveModelValidationError as e:
-            self.assertEqual(e.status_code, 422)
+        except ValidationError as e:
+            response = exception_handler(e)
+            self.assertEqual(response.data,
+                {'errors': {'parent': ['This field is required.']}})
+            self.assertEqual(response.status_code, 422)
 
     def test_deserialize(self):
         serializer = ChildSideloadSerializer(

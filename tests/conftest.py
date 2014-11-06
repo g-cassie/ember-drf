@@ -37,6 +37,29 @@ def pytest_configure():
             'rest_framework',
             'tests',
         ),
+        REST_FRAMEWORK={
+          'DEFAULT_RENDERER_CLASSES': (
+            'ember_drf.renderers.ActiveModelJSONRenderer',
+            'rest_framework.renderers.BrowsableAPIRenderer',
+          ),
+          'DEFAULT_PARSER_CLASSES': (
+            'ember_drf.parsers.ActiveModelJSONParser',
+            'rest_framework.parsers.FormParser',
+            'rest_framework.parsers.MultiPartParser',
+          ),
+          'DEFAULT_AUTHENTICATION_CLASSES': (
+            'rest_framework.authentication.SessionAuthentication',
+          ),
+          'DEFAULT_PERMISSION_CLASSES': (
+            'rest_framework.permissions.IsAuthenticated',
+          ),
+          'DEFAULT_FILTER_BACKENDS': (
+            'rest_framework.filters.DjangoFilterBackend',
+            'ember_drf.filters.CoallesceIDsFilterBackend'
+          ),
+          'EXCEPTION_HANDLER': 'ember_drf.views.exception_handler',
+          'TEST_REQUEST_DEFAULT_FORMAT': 'json',
+        }
     )
 
     try:

@@ -43,19 +43,26 @@ def convert_to_active_model_json(data):
     if serializer and not isinstance(serializer,
             (SideloadSerializer, SideloadListSerializer, ListSerializer)):
         # when a normal serializer is reached we rename each related key
-        for field in serializer.fields.values():
-            if isinstance(field, (PrimaryKeyRelatedField)):
-                name = field.field_name
-                if name in data:
-                    data[name + '_id'] = data[name]
-                    del data[name]
-            elif (isinstance(field, ListSerializer) and \
-                    isinstance(field.child, PrimaryKeyRelatedField)) or \
-                    isinstance(field, ManyRelation):
-                name = field.field_name
-                if name in data:
-                    data[singularize(name) + '_ids'] = data[name]
-                    del data[name]
+        for field in [f for f in serializer.fields.values() if f.field_name in \
+                      data]:
+            name = field.field_name
+
+            # convert belongs to id field
+            if isinstance(field, PrimaryKeyRelatedField):
+                data[name + '_id'] = data[name]
+                del data[name]
+
+            # convert has many id field
+            elif isinstance(field, (ListSerializer, ManyRelation)) \
+                    and any([isinstance(getattr(field, f , None), \
+                    PrimaryKeyRelatedField) for f in \
+                    ['child', 'child_relation']]):
+                data[singularize(name) + '_ids'] = data[name]
+                del data[name]
+
+            # convert embedded records
+            elif hasattr(data[name], 'serializer'):
+                convert_to_active_model_json(data[name])
         return data
     else:
         if isinstance(data, dict):

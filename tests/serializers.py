@@ -28,6 +28,13 @@ class ParentSerializer(serializers.ModelSerializer):
         model = ParentModel
         fields = ('id', 'text', 'children', 'old_children')
 
+class NestedChildSerializer(ChildSerializer):
+    parent = ParentSerializer()
+    old_parent = ParentSerializer()
+
+class NestedChildSideloadSerializer(SideloadSerializer):
+    class Meta:
+        base_serializer = NestedChildSerializer
 
 class ChildSideloadSerializer(SideloadSerializer):
     class Meta:
