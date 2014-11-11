@@ -2,17 +2,13 @@
 import os
 from setuptools import setup, find_packages
 
-def get_readme():
-    return open(os.path.join(os.path.dirname(__file__), 'README.md')).read()
-
 setup(
-    name='DRF Ember',
-    version='0.1.0',
+    name='emberdrf',
+    version='0.1.1',
     description="Django Rest Framework addons to integrate with Ember.js",
-    long_description=get_readme(),
     author="Gordon Cassie",
     author_email='gordoncassie@gmail.com',
-    url='https://github.com/ngenworks/rest_framework_ember',
+    url='https://github.com/g-cassie/ember-drf',
     license='BSD',
     keywords="EmberJS Django REST",
     packages=find_packages(),

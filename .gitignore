@@ -4,6 +4,7 @@
 .*
 *.egg-info
 profile
+dist
 
 !.gitignore
 __pycache__

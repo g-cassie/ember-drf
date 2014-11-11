@@ -6,12 +6,10 @@ from rest_framework.serializers import (
 )
 from rest_framework.utils.model_meta import get_field_info
 
-from ember_drf.exceptions import ActiveModelValidationError
-
 
 def get_ember_json_key_for_model(model, singular=False):
     """
-    Take a model a return the key that is records should be nested under.
+    Get the key that a model's records should be nested under.
     """
     name = model.__name__
     if not singular:
@@ -105,13 +103,13 @@ class SideloadSerializerMixin(object):
 class SideloadListSerializer(SideloadSerializerMixin, ListSerializer):
 
     def __init__(self, *args, **kwargs):
-        meta = kwargs['child'].Meta
+        super(SideloadListSerializer, self).__init__(*args, **kwargs)
+        meta = self.child.Meta
         self.base_serializer = meta.base_serializer()
         self.model = self.base_serializer.Meta.model
         self.base_key = getattr(self.base_serializer.Meta, 'base_key',
                                 get_ember_json_key_for_model(self.model, True))
         self._configure_sideloads(meta)
-        return super(SideloadListSerializer, self).__init__(*args, **kwargs)
 
     def get_sideload_ids(self, data):
         """
@@ -173,7 +171,7 @@ class SideloadSerializer(SideloadSerializerMixin, Serializer):
             self.base_serializer = base_serializer(
                 instance=instance, data=data, **kwargs)
             self._configure_sideloads(self.Meta)
-        return super(SideloadSerializer, self).__init__(instance, data, **kwargs)
+        super(SideloadSerializer, self).__init__(instance, data, **kwargs)
 
     def __new__(cls, *args, **kwargs):
         """
@@ -184,7 +182,7 @@ class SideloadSerializer(SideloadSerializerMixin, Serializer):
         if kwargs.pop('many', False):
             kwargs['child'] = cls(*args, **kwargs)
             return SideloadListSerializer(*args, **kwargs)
-        return super(Serializer, cls).__new__(cls, *args, **kwargs)
+        return super(SideloadSerializer, cls).__new__(cls, *args, **kwargs)
 
     def get_sideload_ids(self, instance):
         """
