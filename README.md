@@ -9,7 +9,11 @@ goal is to make this as pluggable as possible.
 
 # Installation
 
-TODO
+The module is available on pypi as `emberdrf` and can be installed using pip:
+
+```
+pip install emberdrf
+```
 
 # How to Use
 
