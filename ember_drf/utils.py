@@ -1,6 +1,6 @@
 from inflection import camelize, singularize, pluralize, underscore
 
-from rest_framework.relations import PrimaryKeyRelatedField, ManyRelation
+from rest_framework.relations import PrimaryKeyRelatedField, ManyRelatedField
 from rest_framework.serializers import ListSerializer
 
 from ember_drf.serializers import SideloadListSerializer, SideloadSerializer
@@ -53,7 +53,7 @@ def convert_to_active_model_json(data):
                 del data[name]
 
             # convert has many id field
-            elif isinstance(field, (ListSerializer, ManyRelation)) \
+            elif isinstance(field, (ListSerializer, ManyRelatedField)) \
                     and any([isinstance(getattr(field, f , None), \
                     PrimaryKeyRelatedField) for f in \
                     ['child', 'child_relation']]):
