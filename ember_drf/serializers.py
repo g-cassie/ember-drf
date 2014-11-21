@@ -1,10 +1,12 @@
 from collections import defaultdict, namedtuple
 from inflection import pluralize, underscore
 
+from rest_framework.compat import OrderedDict
 from rest_framework.serializers import (
-    ReturnDict, ListSerializer, Serializer, ValidationError
+    ListSerializer, Serializer, ValidationError, LIST_SERIALIZER_KWARGS
 )
 from rest_framework.utils.model_meta import get_field_info
+from rest_framework.utils.serializer_helpers import ReturnDict
 
 
 def get_ember_json_key_for_model(model, singular=False):
@@ -63,8 +65,9 @@ class SideloadSerializerMixin(object):
         for key, ids in sideload_ids.items():
             conf = self.sideloads[
                 [t.key_name for t in self.sideloads].index(key)]
-            ret[key] = conf.serializer(
-                conf.queryset.filter(id__in=ids), many=True).data
+            queryset = conf.queryset.filter(id__in=ids)
+            serializer = conf.serializer(queryset, many=True)
+            ret[key] = serializer.data
         return ret
 
     def _configure_sideloads(self, meta):
@@ -136,10 +139,16 @@ class SideloadListSerializer(SideloadSerializerMixin, ListSerializer):
         """
         Overrides to nest the primary record and add sideloads.
         """
-        ret = ReturnDict(serializer=self)
-        ret[pluralize(self.base_key)] = self.base_serializer.__class__(instance, many=True).data
+        ret = OrderedDict()
+        base_data = self.base_serializer.__class__(instance, many=True).data
+        ret[pluralize(self.base_key)] = base_data
         ret.update(self.get_sideload_objects(instance))
         return ret
+
+    @property
+    def data(self):
+        ret = super(ListSerializer, self).data
+        return ReturnDict(ret, serializer=self)
 
 
 class SideloadSerializer(SideloadSerializerMixin, Serializer):
@@ -173,16 +182,18 @@ class SideloadSerializer(SideloadSerializerMixin, Serializer):
             self._configure_sideloads(self.Meta)
         super(SideloadSerializer, self).__init__(instance, data, **kwargs)
 
-    def __new__(cls, *args, **kwargs):
+    @classmethod
+    def many_init(cls, *args, **kwargs):
         """
-        Automatically create a SideloadListSerializer when `many=True`.
-
-        This copies the internal DRF pattern with `Serializer`/`ListSerializer`.
+        Override `.many_init()` to create a SideloadListSerializer instance.
         """
-        if kwargs.pop('many', False):
-            kwargs['child'] = cls(*args, **kwargs)
-            return SideloadListSerializer(*args, **kwargs)
-        return super(SideloadSerializer, cls).__new__(cls, *args, **kwargs)
+        child_serializer = cls(*args, **kwargs)
+        list_kwargs = {'child': child_serializer}
+        list_kwargs.update(dict([
+            (key, value) for key, value in kwargs.items()
+            if key in LIST_SERIALIZER_KWARGS
+        ]))
+        return SideloadListSerializer(*args, **list_kwargs)
 
     def get_sideload_ids(self, instance):
         """
@@ -201,11 +212,11 @@ class SideloadSerializer(SideloadSerializerMixin, Serializer):
         """
         Overrides the DRF method to add a root key and sideloads.
         """
-        base_result = self.base_serializer.to_representation(instance)
+        base_result = self.base_serializer.data
         if self.is_nested:
             return base_result
 
-        ret = ReturnDict(serializer=self)
+        ret = OrderedDict()
         key = self.base_key
         ret[key] = base_result
         ret.update(self.get_sideload_objects(instance))

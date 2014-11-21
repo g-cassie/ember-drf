@@ -201,8 +201,10 @@ class TestSideloadListSerializer(TestCase):
 
 
     def test_serialization(self):
+        serializer = ChildSideloadSerializer(ChildModel.objects.all(), many=True)
+        assert isinstance(serializer, SideloadListSerializer)
         with self.assertNumQueries(5):
-            result = ChildSideloadSerializer(ChildModel.objects.all(), many=True).data
+            result = serializer.data
         expected = {
             'child_models': [{
                 'id': c.pk,
