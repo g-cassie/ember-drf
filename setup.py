@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='emberdrf',
-    version='0.1.1',
+    version='0.1.2',
     description="Django Rest Framework addons to integrate with Ember.js",
     author="Gordon Cassie",
     author_email='gordoncassie@gmail.com',

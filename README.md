@@ -1,7 +1,11 @@
 # IMPORTANT: DJANGO REST FRAMEWORK 3
 
-This module will only work with version 3 of [django rest framework](http://www.django-rest-framework.org/).  At the time of writing, v3.0 has been
-merged to the DRF's master branch but has not yet been deployed to pypi.
+This module will only work with version 3 of [django rest framework](http://www.django-rest-framework.org/).  At the time of writing, v3.0 has been released in beta and is available for installation through pip using the following command:
+
+```
+pip install https://github.com/tomchristie/django-rest-framework/archive/3.0-beta.zip
+```
+
 Please make sure you that you have DRF 3.0 properly installed before trying to
 use `ember_drf`.
 
