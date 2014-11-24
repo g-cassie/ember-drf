@@ -79,11 +79,8 @@ def rename_related_fields(data, fields):
 def convert_to_active_model_json(data):
     try:
         serializer = data.serializer
-    except:
-        raise ValueError(
-            'You must pass in a ReturnDict or ReturnList with `.serializer`'
-            'set.'
-        )
+    except AttributeError:
+        return data
     related_fields = []
     if isinstance(serializer, (SideloadSerializer, SideloadListSerializer)):
         for key, value in data.items():

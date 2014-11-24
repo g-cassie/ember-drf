@@ -212,6 +212,7 @@ class SideloadSerializer(SideloadSerializerMixin, Serializer):
         """
         Overrides the DRF method to add a root key and sideloads.
         """
+        # self.base_serializer.instance = instance
         base_result = self.base_serializer.data
         if self.is_nested:
             return base_result
@@ -239,6 +240,10 @@ class SideloadSerializer(SideloadSerializerMixin, Serializer):
     def is_valid(self, raise_exception=False):
         """Proxy `.is_valid()` to `Meta.base_serializer`. """
         return self.base_serializer.is_valid(raise_exception)
+
+    def save(self, **kwargs):
+        self.instance = self.base_serializer.save(**kwargs)
+        return self.instance
 
     @property
     def errors(self):
