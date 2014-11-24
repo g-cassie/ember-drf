@@ -35,7 +35,7 @@ class RendererTests(TestCase):
         parent = ParentModel.objects.create()
         old_parent = ParentModel.objects.create()
         child = ChildModel.objects.create(parent=parent, old_parent=old_parent)
-        obj = ChildSideloadSerializer(child).data
+        obj = ChildSideloadSerializer(instance=child).data
         expected = {
             'child_model': OrderedDict([
                 ('id', child.id,),
@@ -48,6 +48,7 @@ class RendererTests(TestCase):
                 for p in [parent, old_parent]
             ]
         }
+        print obj
         result = convert_to_active_model_json(obj)
         assert result == expected
 
