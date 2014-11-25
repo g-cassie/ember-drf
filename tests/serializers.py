@@ -28,19 +28,34 @@ class ParentSerializer(serializers.ModelSerializer):
         model = ParentModel
         fields = ('id', 'text', 'children', 'old_children')
 
+class NestedParentSerializer(ParentSerializer):
+    children = ChildSerializer(many=True)
+    old_children = ChildSerializer(many=True)
+
 class NestedChildSerializer(ChildSerializer):
     parent = ParentSerializer()
     old_parent = ParentSerializer()
+
+class DeepNestedParentSerializer(ParentSerializer):
+    children = NestedChildSerializer(many=True)
+    old_children = NestedChildSerializer(many=True)
+
+class DeepNestedParentSideloadSerializer(SideloadSerializer):
+    class Meta:
+        base_serializer = DeepNestedParentSerializer
 
 class NestedChildSideloadSerializer(SideloadSerializer):
     class Meta:
         base_serializer = NestedChildSerializer
 
+class NestedParentSideloadSerializer(SideloadSerializer):
+    class Meta:
+        base_serializer = NestedParentSerializer
+
 class ChildSideloadSerializer(SideloadSerializer):
     class Meta:
         base_serializer = ChildSerializer
         sideloads = [(ParentModel, ParentSerializer, ParentModel.objects.prefetch_related('children', 'old_children'))]
-
 
 class OptionalChildSideloadSerializer(SideloadSerializer):
     class Meta:
