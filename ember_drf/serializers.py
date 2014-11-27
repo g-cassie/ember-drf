@@ -140,7 +140,11 @@ class SideloadListSerializer(SideloadSerializerMixin, ListSerializer):
         Overrides to nest the primary record and add sideloads.
         """
         ret = OrderedDict()
-        base_data = self.base_serializer.__class__(instance, many=True).data
+        base_data = self.base_serializer.__class__(
+            instance,
+            many=True,
+            context=self.context
+        ).data
         ret[pluralize(self.base_key)] = base_data
         ret.update(self.get_sideload_objects(instance))
         return ret
