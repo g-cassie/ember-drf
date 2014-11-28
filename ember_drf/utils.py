@@ -62,7 +62,7 @@ def find_related_fields_to_rename(fields, prefix=[]):
         # iterate over any nested lists
         if field._proxy_class is ListSerializer:
             ret.extend(
-                find_related_fields_to_rename(field._field, prefix=key)
+                find_related_fields_to_rename(field.child, prefix=key)
             )
         # any nested dicts should be iterated over
         # this could check if `field` is an instance of `NestedBoundField`
