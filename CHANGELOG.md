@@ -1,3 +1,6 @@
+## 0.1.3
++ Pass context into `.base_serializer()`. See https://github.com/g-cassie/ember-drf/pull/3
++ Remove unnecessary use of `._field`
 
 ## 0.1.2
 + Fix bug due to renaming of ManyRelation to ManyRelatedField in DRF 3.0
