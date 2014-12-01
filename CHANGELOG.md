@@ -1,3 +1,6 @@
+## 0.1.4
++ Use flexible version numbers in requirements.txt
+
 ## 0.1.3
 + Pass context into `.base_serializer()`. See https://github.com/g-cassie/ember-drf/pull/3
 + Remove unnecessary use of `._field`
