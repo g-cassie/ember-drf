@@ -111,7 +111,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PARSER_CLASSES': (
         # Choose one:
         'ember_drf.parsers.ActiveModelJSONParser',
-        'ember_drf.parsers.EmberJSONRenderer',
+        'ember_drf.parsers.EmberJSONParser',
 
         # leave this
         'rest_framework.parsers.MultiPartParser',
