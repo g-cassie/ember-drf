@@ -1,5 +1,5 @@
 from ember_drf.parsers import ActiveModelJSONParser, EmberJSONParser
-from rest_framework.compat import StringIO
+from django.utils.six.moves import StringIO
 
 
 def test_active_model_parser():
