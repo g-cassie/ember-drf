@@ -9,7 +9,7 @@ from tests.models import ChildModel, ParentModel, OptionalChildModel, \
     OneToOne, ReverseOneToOne
 from tests.serializers import ChildSideloadSerializer, \
     OptionalChildSideloadSerializer, OneToOneSideloadSerializer, \
-    ReverseOneToOneSideloadSerializer, ChildSerializer
+    ReverseOneToOneSideloadSerializer, ChildSerializer, ParentSideloadSerializer
 
 
 class TestSideloadSerializer(TestCase):
@@ -25,6 +25,10 @@ class TestSideloadSerializer(TestCase):
         expected = set([self.parent.id, self.old_parent.id])
         self.assertEqual(len(result), 1)
         self.assertEqual(result['parent_models'], expected)
+
+    def test_get_many_sideload_ids(self):
+        result = ParentSideloadSerializer().get_sideload_ids(self.parent)
+        raise ValueError(result)
 
     def test_get_sideload_objects(self):
         result = ChildSideloadSerializer().get_sideload_objects(self.child)

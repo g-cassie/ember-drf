@@ -52,6 +52,12 @@ class NestedParentSideloadSerializer(SideloadSerializer):
     class Meta:
         base_serializer = NestedParentSerializer
 
+class ParentSideloadSerializer(SideloadSerializer):
+    class Meta:
+        model = ParentModel
+        base_serializer = ParentSerializer
+        sideloads = [(ChildModel, ChildSerializer)]
+
 class ChildSideloadSerializer(SideloadSerializer):
     class Meta:
         base_serializer = ChildSerializer
