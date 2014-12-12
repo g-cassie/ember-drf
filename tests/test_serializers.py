@@ -28,7 +28,9 @@ class TestSideloadSerializer(TestCase):
 
     def test_get_many_sideload_ids(self):
         result = ParentSideloadSerializer().get_sideload_ids(self.parent)
-        raise ValueError(result)
+        expected = set([self.child.id])
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result['child_models'], expected)
 
     def test_get_sideload_objects(self):
         result = ChildSideloadSerializer().get_sideload_objects(self.child)
@@ -207,7 +209,7 @@ class TestSideloadListSerializer(TestCase):
     def test_serialization(self):
         serializer = ChildSideloadSerializer(ChildModel.objects.all(), many=True)
         assert isinstance(serializer, SideloadListSerializer)
-        with self.assertNumQueries(5):
+        with self.assertNumQueries(4):
             result = serializer.data
         expected = {
             'child_models': [{

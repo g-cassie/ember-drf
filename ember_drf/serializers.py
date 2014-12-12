@@ -1,6 +1,8 @@
 from collections import defaultdict, namedtuple
 from inflection import pluralize, underscore
 
+from django.db.models.query import QuerySet
+
 from rest_framework.compat import OrderedDict
 from rest_framework.serializers import (
     ListSerializer, Serializer, ValidationError, LIST_SERIALIZER_KWARGS
@@ -206,7 +208,7 @@ class SideloadSerializer(SideloadSerializerMixin, Serializer):
         sideload_ids = defaultdict(set)
         for config in self.sideloads:
             attribute = config.field.get_attribute(instance)
-            if isinstance(attribute, list):
+            if isinstance(attribute, (list, QuerySet)):
                 sideload_ids[config.key_name].update([a.pk for a in attribute])
             else:
                 sideload_ids[config.key_name].add(attribute.pk if attribute else None)
