@@ -1,9 +1,9 @@
 # IMPORTANT: DJANGO REST FRAMEWORK 3
 
-This module will only work with version 3 of [django rest framework](http://www.django-rest-framework.org/).  At the time of writing, v3.0 has been released in beta and is available for installation through pip using the following command:
+This module will only work with version 3 of [django rest framework](http://www.django-rest-framework.org/).  DRF v3.0 has now been released is available for installation through pip using the following command:
 
 ```
-pip install https://github.com/tomchristie/django-rest-framework/archive/3.0-beta.zip
+pip install djangorestframework
 ```
 
 Please make sure you that you have DRF 3.0 properly installed before trying to
@@ -111,7 +111,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PARSER_CLASSES': (
         # Choose one:
         'ember_drf.parsers.ActiveModelJSONParser',
-        'ember_drf.parsers.EmberJSONRenderer',
+        'ember_drf.parsers.EmberJSONParser',
 
         # leave this
         'rest_framework.parsers.MultiPartParser',
@@ -173,6 +173,7 @@ REST_FRAMEWORK = {
     )
     # ... include other REST_FRAMEWORK settings as needed
 }
+```
 
 ## 6. Errors Formatting
 
