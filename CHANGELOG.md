@@ -1,3 +1,7 @@
+## 0.1.5
++ Fix compatability issues with DRF 3.0.1. Closes https://github.com/g-cassie/ember-drf/issues/6
++ Updates to Readme
+
 ## 0.1.4
 + Use flexible version numbers in requirements.txt
 
