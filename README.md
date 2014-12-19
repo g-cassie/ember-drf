@@ -1,14 +1,3 @@
-# IMPORTANT: DJANGO REST FRAMEWORK 3
-
-This module will only work with version 3 of [django rest framework](http://www.django-rest-framework.org/).  DRF v3.0 has now been released is available for installation through pip using the following command:
-
-```
-pip install djangorestframework
-```
-
-Please make sure you that you have DRF 3.0 properly installed before trying to
-use `ember_drf`.
-
 # Overview
 
 This project aims to create a python package that makes it simple to build an
@@ -25,6 +14,18 @@ The module is available on pypi as `emberdrf` and can be installed using pip:
 ```
 pip install emberdrf
 ```
+
+## Django Rest Framework compatability
+
+This module will only work with version 3 or higher of [django rest framework](http://www.django-rest-framework.org/).
+
+```
+pip install djangorestframework
+```
+
+Please make sure you that you have DRF 3.0 properly installed before trying to
+use `ember_drf`.
+
 
 # How to Use
 
