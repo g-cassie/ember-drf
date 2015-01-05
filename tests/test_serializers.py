@@ -109,17 +109,17 @@ class TestSideloadSerializerCreate(TestCase):
             {'parent': self.parent.pk, 'old_parent': self.old_parent.pk }}
 
     def test_deserialize_requires_root_key(self):
-        with self.assertRaises(ValidationError):
+        with self.assertRaises(AssertionError):
             ChildSideloadSerializer(data=self.payload['child_model'])
 
     def test_deserialize_field_validation_works(self):
         self.payload['child_model'].pop('parent')
         with self.assertRaises(ValidationError):
-            ChildSideloadSerializer(data=self.payload['child_model'])
+            ChildSideloadSerializer(data=self.payload).is_valid(True)
 
     def test_deserialize(self):
         serializer = ChildSideloadSerializer(data=self.payload)
-        self.assertTrue(serializer.is_valid)
+        self.assertTrue(serializer.is_valid())
 
     def test_create(self):
         serializer = ChildSideloadSerializer(data=self.payload)
@@ -162,7 +162,7 @@ class TestSideloadSerializerUpdate(TestCase):
     def test_deserialize(self):
         serializer = ChildSideloadSerializer(
             instance=self.child, data=self.payload)
-        self.assertTrue(serializer.is_valid)
+        self.assertTrue(serializer.is_valid())
 
     def test_update(self):
         serializer = ChildSideloadSerializer(

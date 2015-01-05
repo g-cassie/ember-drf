@@ -181,9 +181,9 @@ class SideloadSerializer(SideloadSerializerMixin, Serializer):
                 get_ember_json_key_for_model(self.model, True))
             if data is not empty:
                 if not isinstance(data, dict):
-                    raise ValidationError('`data` must be a `dict`.')
+                    raise AssertionError('`data` must be a `dict`.')
                 if self.base_key not in data:
-                    raise ValidationError(
+                    raise AssertionError(
                         'You must nest the attributes for the new object '
                         'under a root key: %s' % self.base_key)
                 data = data[self.base_key]
