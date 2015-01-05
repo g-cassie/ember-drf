@@ -1,3 +1,6 @@
+## 0.1.6
++ Fix compatability issues with DRF 3.0.2.
+
 ## 0.1.5
 + Fix compatability issues with DRF 3.0.1. Closes https://github.com/g-cassie/ember-drf/issues/6
 + Updates to Readme
