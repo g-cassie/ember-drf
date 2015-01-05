@@ -4,6 +4,7 @@ from inflection import pluralize, underscore
 from django.db.models.query import QuerySet
 
 from rest_framework.compat import OrderedDict
+from rest_framework.fields import empty
 from rest_framework.serializers import (
     ListSerializer, Serializer, ValidationError, LIST_SERIALIZER_KWARGS
 )
@@ -159,7 +160,7 @@ class SideloadListSerializer(SideloadSerializerMixin, ListSerializer):
 
 class SideloadSerializer(SideloadSerializerMixin, Serializer):
 
-    def __init__(self, instance=None, data=None, **kwargs):
+    def __init__(self, instance=None, data=empty, **kwargs):
         """
         Setup the SideloadSerializer and configure it.
 
@@ -175,10 +176,13 @@ class SideloadSerializer(SideloadSerializerMixin, Serializer):
         else:
             base_serializer = self.Meta.base_serializer
             self.model = base_serializer.Meta.model
-            self.base_key = getattr(base_serializer.Meta, 'base_key',
+            self.base_key = getattr(
+                base_serializer.Meta, 'base_key',
                 get_ember_json_key_for_model(self.model, True))
-            if data:
-                if not self.base_key in data:
+            if data is not empty:
+                if not isinstance(data, dict):
+                    raise ValidationError('`data` must be a `dict`.')
+                if self.base_key not in data:
                     raise ValidationError(
                         'You must nest the attributes for the new object '
                         'under a root key: %s' % self.base_key)
