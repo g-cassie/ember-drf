@@ -1,3 +1,8 @@
+## 0.1.7
++ Fix additional compatability issues with DRF 3.0.2.
++ Remove install requirements to prevent emberdrf from upgrading django
+  on install.
+
 ## 0.1.6
 + Fix compatability issues with DRF 3.0.2.
 
