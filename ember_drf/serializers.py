@@ -261,6 +261,6 @@ class SideloadSerializer(SideloadSerializerMixin, Serializer):
         return self.base_serializer.errors
 
     @property
-    def validated_data(self):
+    def _validated_data(self):
         """Proxy `.errors` to `Meta.base_serializer`. """
-        return self.base_serializer.validated_data
+        return self.base_serializer._validated_data

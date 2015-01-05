@@ -139,7 +139,7 @@ class TestSideloadSerializerUpdate(TestCase):
         # change `old_parent` to `self.parent`
         self.payload = {'child_model':
             {'id': self.child.pk, 'parent': self.parent.pk,
-            'old_parent': self.parent.pk }}
+             'old_parent': self.parent.pk}}
 
     def test_deserialize_field_validation_works(self):
         self.payload['child_model'].pop('parent')
@@ -155,7 +155,8 @@ class TestSideloadSerializerUpdate(TestCase):
             serializer.is_valid(True)
         except ValidationError as e:
             response = exception_handler(e)
-            self.assertEqual(response.data,
+            self.assertEqual(
+                response.data,
                 {'errors': {'parent': ['This field is required.']}})
             self.assertEqual(response.status_code, 422)
 
@@ -163,12 +164,14 @@ class TestSideloadSerializerUpdate(TestCase):
         serializer = ChildSideloadSerializer(
             instance=self.child, data=self.payload)
         self.assertTrue(serializer.is_valid())
+        serializer.data
 
     def test_update(self):
         serializer = ChildSideloadSerializer(
             instance=self.child, data=self.payload)
         self.assertEqual(
-            ChildModel.objects.get(pk=self.child.pk).old_parent, self.old_parent)
+            ChildModel.objects.get(pk=self.child.pk).old_parent,
+            self.old_parent)
         serializer.is_valid()
         serializer.save()
         self.assertEqual(
