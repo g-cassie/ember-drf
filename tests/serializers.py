@@ -77,3 +77,19 @@ class ReverseOneToOneSideloadSerializer(SideloadSerializer):
     class Meta:
         base_serializer = ReverseOneToOneSerializer
         sideloads = [(OneToOne, OneToOneSerializer)]
+
+class ChildSerializerUsingParentContext(serializers.ModelSerializer):
+    class Meta:
+        model = ChildModel
+        fields = ('value_from_parent_context',)
+
+    value_from_parent_context = serializers.SerializerMethodField()
+
+    def get_value_from_parent_context(self, instance):
+        return self.context['some_value']
+
+class ParentSideloadSerializerWithContext(SideloadSerializer):
+    class Meta:
+        model = ParentModel
+        base_serializer = ParentSerializer
+        sideloads = [(ChildModel, ChildSerializerUsingParentContext)]
