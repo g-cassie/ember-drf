@@ -69,7 +69,11 @@ class SideloadSerializerMixin(object):
             conf = self.sideloads[
                 [t.key_name for t in self.sideloads].index(key)]
             queryset = conf.queryset.filter(id__in=ids)
-            serializer = conf.serializer(queryset, many=True)
+            serializer = conf.serializer(
+                queryset,
+                many=True,
+                context=self.context
+            )
             ret[key] = serializer.data
         return ret
 
