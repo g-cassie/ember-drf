@@ -9,7 +9,8 @@ from tests.models import ChildModel, ParentModel, OptionalChildModel, \
     OneToOne, ReverseOneToOne
 from tests.serializers import ChildSideloadSerializer, \
     OptionalChildSideloadSerializer, OneToOneSideloadSerializer, \
-    ReverseOneToOneSideloadSerializer, ChildSerializer, ParentSideloadSerializer
+    ReverseOneToOneSideloadSerializer, ChildSerializer, \
+    ParentSideloadSerializer, ParentSideloadSerializerWithContext
 
 
 class TestSideloadSerializer(TestCase):
@@ -228,3 +229,21 @@ class TestSideloadListSerializer(TestCase):
             ]
         }
         self.assertEqual(result, expected)
+
+
+class TestChildrenCanAccessParentContext(TestCase):
+
+    def test_children_can_access_parent_context(self):
+        parent = ParentModel.objects.create()
+        old_parent = ParentModel.objects.create()
+        ChildModel.objects.create(parent=parent, old_parent=old_parent)
+
+        serializer = ParentSideloadSerializerWithContext(
+            parent,
+            context={'some_value': 'my value'}
+        )
+
+        self.assertEquals(
+            serializer.data['child_models'][0]['value_from_parent_context'],
+            'my value'
+        )
