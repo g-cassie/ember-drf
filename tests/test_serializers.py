@@ -155,7 +155,7 @@ class TestSideloadSerializerUpdate(TestCase):
         try:
             serializer.is_valid(True)
         except ValidationError as e:
-            response = exception_handler(e)
+            response = exception_handler(e, serializer.context)
             self.assertEqual(
                 response.data,
                 {'errors': {'parent': ['This field is required.']}})
