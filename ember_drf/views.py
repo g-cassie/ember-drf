@@ -1,8 +1,9 @@
-from rest_framework.exceptions import  ValidationError
+from rest_framework.exceptions import ValidationError
 from rest_framework.views import exception_handler as drf_exception_handler
 from rest_framework.response import Response
 
-def exception_handler(exc):
+
+def exception_handler(exc, context):
     """
     Returns the response that should be used for any given exception.
 
@@ -17,4 +18,4 @@ def exception_handler(exc):
         data = {'errors': exc.detail}
         return Response(data, status=422)
     else:
-        return drf_exception_handler(exc)
+        return drf_exception_handler(exc, context)

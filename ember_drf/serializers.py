@@ -11,6 +11,8 @@ from rest_framework.serializers import (
 from rest_framework.utils.model_meta import get_field_info
 from rest_framework.utils.serializer_helpers import ReturnDict
 
+from . import compat
+
 
 def get_ember_json_key_for_model(model, singular=False):
     """
@@ -96,9 +98,12 @@ class SideloadSerializerMixin(object):
 
         relations = get_field_info(self.model).relations
         fields = self.base_serializer.fields.values()
-        for field_name, info in relations.items():
+        for field_name, relation_info in relations.items():
             try:
-                conf = configs[[t[0] for t in configs].index(info.related)]
+                related_model = compat.get_related_model(relation_info)
+                conf = configs[
+                    [t[0] for t in configs].index(related_model)
+                ]
             except ValueError:
                 continue
             field = fields[[f.source for f in fields].index(field_name)]
