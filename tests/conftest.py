@@ -47,12 +47,6 @@ def pytest_configure():
             'rest_framework.parsers.FormParser',
             'rest_framework.parsers.MultiPartParser',
           ),
-          'DEFAULT_AUTHENTICATION_CLASSES': (
-            'rest_framework.authentication.SessionAuthentication',
-          ),
-          'DEFAULT_PERMISSION_CLASSES': (
-            'rest_framework.permissions.IsAuthenticated',
-          ),
           'DEFAULT_FILTER_BACKENDS': (
             'rest_framework.filters.DjangoFilterBackend',
             'ember_drf.filters.CoallesceIDsFilterBackend'
