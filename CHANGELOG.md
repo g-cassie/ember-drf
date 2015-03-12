@@ -1,3 +1,7 @@
+## 0.1.8
++ Fix compatability issues with DRF 3.0.1
++ Fix bug with serializers passing in parent context
+
 ## 0.1.7
 + Fix additional compatability issues with DRF 3.0.2.
 + Remove install requirements to prevent emberdrf from upgrading django
