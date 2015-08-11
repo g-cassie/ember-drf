@@ -5,6 +5,16 @@ versions of django-rest-framework.
 import inspect
 
 
+def get_request_query_params(request):
+    """
+    `request.QUERY_PARAMS` has been deprecated in favor of `request.query_params`
+    since version 3.0, and has been fully removed as of version 3.2.
+    """
+    try:
+        return request.QUERY_PARAMS
+    except NotImplementedError:
+        return request.query_params
+
 
 def get_related_model(relation_info):
     """
