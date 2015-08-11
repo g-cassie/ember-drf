@@ -1,5 +1,7 @@
 from rest_framework import filters
 
+from . import compat
+
 
 class CoallesceIDsFilterBackend(filters.BaseFilterBackend):
     """
@@ -9,7 +11,8 @@ class CoallesceIDsFilterBackend(filters.BaseFilterBackend):
     for more detail.
     """
     def filter_queryset(self, request, queryset, view):
-        ids = dict(request.QUERY_PARAMS).get('ids[]')
+        query_params = compat.get_request_query_params(request)
+        ids = dict(query_params).get('ids[]')
         if ids:
             queryset = queryset.filter(id__in=ids)
         return queryset
