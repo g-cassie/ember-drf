@@ -1,3 +1,11 @@
+# Warning - Ember Data and JSON API
+
+Since the creation of this addon, Ember Data has released a stable
+version and is officially supporting JSON API.  Ember DRF does not
+current support JSON API and there are no immediate plans to implement
+support for it. Currently this addon is best suited for integrating DRF
+with Ember Data versions prior to 1.13.
+
 # Overview
 
 This project aims to create a python package that makes it simple to build an

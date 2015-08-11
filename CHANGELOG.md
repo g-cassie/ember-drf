@@ -1,3 +1,7 @@
+## 0.1.9
++ Fix compatability issues with DRF 3.2
++ Add Readme note about Ember Data 1.13 and JSON API
+
 ## 0.1.8
 + Fix compatability issues with DRF 3.0.1
 + Fix bug with serializers passing in parent context
