@@ -1,12 +1,11 @@
-from collections import defaultdict, namedtuple
+from collections import defaultdict, namedtuple, OrderedDict
 from inflection import pluralize, underscore
 
 from django.db.models.query import QuerySet
 
-from rest_framework.compat import OrderedDict
 from rest_framework.fields import empty
 from rest_framework.serializers import (
-    ListSerializer, Serializer, ValidationError, LIST_SERIALIZER_KWARGS
+    ListSerializer, Serializer, LIST_SERIALIZER_KWARGS
 )
 from rest_framework.utils.model_meta import get_field_info
 from rest_framework.utils.serializer_helpers import ReturnDict
